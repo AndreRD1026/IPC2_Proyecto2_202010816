@@ -1,7 +1,7 @@
 class Ciudad:
-    def __init__(self, nombre,filas):
+    def __init__(self, nombre):
         self.nombre = nombre
-        self.filas = filas
+        #self.filas = filas
         #self.coordenadaInicio = coordenadaInicio
         #self.coordenadaFinal = coordenadaFinal
         #self.matrizTerreno = Matriz()
