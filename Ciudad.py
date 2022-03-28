@@ -6,6 +6,6 @@ class Ciudad:
         #self.coordenadaFinal = coordenadaFinal
         #self.matrizTerreno = Matriz()
         #self.coordenadasRuta = ListaDoble()
-        #self.gasRuta = 0
+        #self.robot = 0
         self.siguiente = None
         self.procesado = False

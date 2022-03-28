@@ -1,3 +1,4 @@
+from graphviz import view
 from Nodo_Encabezado import Nodo_Encabezado
 from Lista_Encabezado import Lista_Encabezado
 import os
@@ -211,9 +212,8 @@ class MatrizDispersa():
         dot = "Grafico/" + "matriz_{}_dot.txt".format(nombre)
         with open(dot, 'w') as grafo:
             grafo.write(contenido)
-        result = "Grafico/" + "matriz_{}.pdf".format(nombre)
+        result ='Prueba/'+"matriz_{}.pdf".format(nombre)
         os.system("neato -Tpdf " + dot + " -o " + result)
-        #webbrowser.open(result)
 
 
     def graficarDot(self, nombre):
@@ -328,4 +328,5 @@ class MatrizDispersa():
             f.write(grafo)
         result =  "Grafico/" + "matriz_{}.pdf".format(nombre)
         os.system("dot -Tpdf " + dot + " -o " + result)
+        
         
