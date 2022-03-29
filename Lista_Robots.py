@@ -1,41 +1,31 @@
 from Robot import Robot
-
-class nodoDoble:
-    def __init__(self, tipo = None, capacidad_combate=None, nombre_r = None, siguiente= None, anterior = None):
-        self.tipo = tipo
-        self.capacidad_combate = capacidad_combate
-        self.nombre_r = nombre_r
-        self.siguiente = siguiente
-        self.anterior = anterior
-
 class Lista_Robots:
     def __init__(self):
-        self.raiz = nodoDoble()
-        self.ultimo = self.raiz
+        self.inicio = None
+        self.largoRobot = 0
 
-    def insertarRobot(self,nuevonodo):
-        if self.raiz.tipo is None:
-            self.raiz = nuevonodo
-        elif self.raiz.siguiente is None:
-            self.raiz.siguiente = nuevonodo
-            nuevonodo.anterior = self.raiz
-            self.ultimo = nuevonodo
+    def agregarRobot(self, tipo,capacidad_combate,nombre_r):
+        nuevoRobot = Robot(tipo,capacidad_combate,nombre_r)
+        self.largoRobot +=1
+        if self.inicio == None:
+            self.inicio = nuevoRobot
         else:
-            self.ultimo.siguiente = nuevonodo
-            nuevonodo.anterior = self.ultimo
-            self.ultimo=nuevonodo
+            tmp = self.inicio
+            while tmp.siguiente is not None:
+                tmp = tmp.siguiente
+            tmp.siguiente = nuevoRobot
+        
+    def mostrarRobot(self):
+        tmp = self.inicio
+        while tmp is not None:
+            #time.sleep(0.5)
+            print("Nombre: " + tmp.getNombre(), "Tipo: " + tmp.getTipo(), "Capacidad: " + tmp.getCapacidad_Combate() )
+            tmp = tmp.siguiente
 
-    def recorrerRobot(self):
-        nodoaux = self.raiz
-        cadena = ''
-        while True:
-            if nodoaux.tipo is not None:
-                cadena += "Tipo: " + nodoaux.tipo + " Capacidad: "+ nodoaux.capacidad_combate + "Nombre: " + nodoaux.nombre_r
-                if nodoaux.siguiente is not None:
-                    cadena +="\n"
-                    nodoaux = nodoaux.siguiente
-                else: 
-                    break
-            else:
-                break
-        print(cadena)
+    def buscarRobot(self, nombre_r):
+        tmp = self.inicio
+        while tmp is not None:
+            if tmp.nombre_r == nombre_r:
+                return tmp 
+            tmp = tmp.siguiente
+        return False

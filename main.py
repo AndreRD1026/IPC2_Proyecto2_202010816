@@ -1,6 +1,8 @@
 from re import sub
 import xml.etree.ElementTree as ET
 from listaSimpleCiudad import ListaSimple as listaciudad
+from Lista_UM import Lista_UM
+from Lista_Robots import Lista_Robots
 import graphviz
 import time
 from MatrizDispersa import MatrizDispersa
@@ -37,48 +39,30 @@ def cargarArchivo():
 
             for elemento in rutaEntrada:
                 for subelemento in elemento:
-                    if subelemento.tag == 'ciudad': 
+                    if subelemento.tag == 'ciudad':
+                        unidades = Lista_UM()
                         for subelemento1 in subelemento:
                             if subelemento1.tag == 'nombre':
                                 doc = open("Salida/" + subelemento1.text + ".txt", "w")
-                                nombre = subelemento1.text    
-                                ciudades.agregar(nombre)  
+                                nombre = subelemento1.text           
                             if subelemento1.tag == 'fila':
                                 doc.write(subelemento1.text + '\n')
-                            #if subelemento1.tag == 'unidadMilitar':
-                            #    ciudades.agregarUnidad(subelemento1.attrib['fila'], subelemento1.attrib['columna'], subelemento1.text)
+                            if subelemento1.tag == 'unidadMilitar':
+                                unidades.agregarUnidad(subelemento1.attrib['fila'], subelemento1.attrib['columna'], subelemento1.text)
+                        ciudades.agregar(nombre, unidades)
                         doc.close()
-
-
-            for elemento in rutaEntrada.find('robots'):
-                for subelemento2 in elemento:
-                    if subelemento2.tag == 'robot':
-                        for subelemento3 in subelemento2:
-                            if subelemento3.tag == 'nombre':
-                                tipo = subelemento3.attrib['tipo']
-                                capacidad_combate = subelemento3.attrib['capacidad']
-                                nombre_r = subelemento3.text
-                                
-            '''for elemento2 in rutaEntrada:
-                for subelemento2 in elemento2:
-                    if subelemento2.tag == 'robot':
-                        for subelemento3 in subelemento2:
-                            if subelemento3.tag == 'nombre':
-                                tipo = subelemento3.attrib['tipo']
-                                capacidad_combate = subelemento3.attrib['capacidad']
-                                nombre_r = subelemento3.text
-                                ciudades.agregarRobot(tipo,capacidad_combate,nombre_r) '''
-                
-
-            #print(prueba)
-
+                    '''if subelemento.tag == 'robot':
+                        robots = Lista_Robots()
+                        for subelemento2 in subelemento:
+                            if subelemento2.tag == 'nombre':
+                                robots.agregarRobot(subelemento2.attrib['tipo'], subelemento2.attrib['capacidad'], subelemento2.text)
+                        ciudades.agregar(nombre, unidades, robots)   '''         
             print("")
             print("-----Ciudades encontradas -----")
             print("")
-            #ciudades.mostrarUnidad()
-            ciudades.mostrarElementos() 
+            ciudades.mostrarElementos()
+            print("") 
             print("----Robots encontrados----") 
-            ciudades.mostrarRobot()         
             time.sleep(0.5)
         except:
             print("")
@@ -128,11 +112,10 @@ def insertaTodo():
                         c += 1
                         matriz.insert(l, c, col)
                 c = 0
-                matriz.graficarNeato(nombreCiudad)
+                matriz.graficarNeato(nombreCiudad, Ciudad)
                 nuevonombre = "matriz_"+nombreCiudad
         print("Ciudad Grafica con exito")
-        #webbrowser.open_new_tab('Prueba/'+ nuevonombre + ".pdf")
-        #webbrowser.open_new_tab(nuevonombre + ".pdf")
+        webbrowser.open(nuevonombre + ".pdf")
     except:
         print("")
         print("Vuelva a elegir una opcion")

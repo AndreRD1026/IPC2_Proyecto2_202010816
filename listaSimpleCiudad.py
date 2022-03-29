@@ -8,8 +8,8 @@ class ListaSimple:
         self.inicio = None
         self.largo = 0
 
-    def agregar(self, nombre):
-        nuevaCiudad = Ciudad(nombre)
+    def agregar(self, nombre, unidades):
+        nuevaCiudad = Ciudad(nombre,unidades)
         self.largo +=1
         if self.inicio == None:
             self.inicio = nuevaCiudad
@@ -23,6 +23,7 @@ class ListaSimple:
         while tmp is not None:
             time.sleep(0.5)
             print("-" + tmp.nombre)
+            #tmp.getUnidades().mostrarUnidad()
             tmp = tmp.siguiente
 
     def buscarCiudad(self,nombre):
@@ -57,12 +58,12 @@ class ListaSimple:
         tmp = self.inicio
         while tmp is not None:
             time.sleep(0.5)
-            print("Posicion X: " + tmp.posx)
-            print("Posicion Y: " + tmp.posy)
-            print("Capacidad: " + tmp.capacidad)
+            print("Posicion X: " + tmp.getPosX())
+            print("Posicion Y: " + tmp.getPosY())
+            print("Capacidad: " + tmp.getCapacidad())
             tmp = tmp.siguiente
 
-    def agregarRobot(self, tipo,capacidad_combate,nombre_r):
+    '''def agregarRobot(self, tipo,capacidad_combate,nombre_r):
         nuevoRobot = Robot(tipo,capacidad_combate,nombre_r)
         self.largo +=1
         if self.inicio == None:
@@ -71,15 +72,15 @@ class ListaSimple:
             tmp = self.inicio
             while tmp.siguiente is not None:
                 tmp = tmp.siguiente
-            tmp.siguiente = nuevoRobot
+            tmp.siguiente = nuevoRobot '''
         
-    def mostrarRobot(self):
+    '''def mostrarRobot(self):
         tmp = self.inicio
         while tmp is not None:
             time.sleep(0.5)
             print("Tipo: " + tmp.tipo)
             print("Capacidad: " + tmp.capacidad_combate)
             print("Nombre: " + tmp.nombre_r)
-            tmp = tmp.siguiente
+            tmp = tmp.siguiente '''
     
             

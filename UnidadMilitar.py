@@ -14,5 +14,7 @@ class Unidad_Militar:
     def setPosY(self, posy):
         self.posy = posy
 
-
-
+    def getCapacidad(self):
+        return self.capacidad
+    def setCapacidad(self, capacidad):
+        self.capacidad = capacidad
