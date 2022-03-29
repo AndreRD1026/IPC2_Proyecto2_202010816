@@ -1,6 +1,8 @@
 from re import sub
 import xml.etree.ElementTree as ET
 from listaSimpleCiudad import ListaSimple as listaciudad
+from Lista_UM import Lista_UM
+from Lista_Robots import Lista_Robots
 import graphviz
 import time
 from MatrizDispersa import MatrizDispersa
@@ -22,14 +24,13 @@ def cargarArchivo():
     global ciudades 
     
     print("---------- Cargar Archivo ----------")
-    #print("")
     Filename = input('Ingrese la ruta del archivo: ')
     file = Filename
 
     if str(file).endswith('.xml'):
         try:
             archivoEntrada = ET.parse(file)
-            rutaEntrada = archivoEntrada.getroot() 
+            rutaEntrada = archivoEntrada.getroot()
 
             print(" El archivo se cargó con éxito ")
             print("")
@@ -38,19 +39,30 @@ def cargarArchivo():
 
             for elemento in rutaEntrada:
                 for subelemento in elemento:
-                    if subelemento.tag == 'ciudad': 
+                    if subelemento.tag == 'ciudad':
+                        unidades = Lista_UM()
                         for subelemento1 in subelemento:
                             if subelemento1.tag == 'nombre':
                                 doc = open("Salida/" + subelemento1.text + ".txt", "w")
-                                nombre = subelemento1.text    
-                                ciudades.agregar(nombre)  
-                            if subelemento1.tag == 'fila': 
+                                nombre = subelemento1.text           
+                            if subelemento1.tag == 'fila':
                                 doc.write(subelemento1.text + '\n')
+                            if subelemento1.tag == 'unidadMilitar':
+                                unidades.agregarUnidad(subelemento1.attrib['fila'], subelemento1.attrib['columna'], subelemento1.text)
+                        ciudades.agregar(nombre, unidades)
                         doc.close()
-
+                    '''if subelemento.tag == 'robot':
+                        robots = Lista_Robots()
+                        for subelemento2 in subelemento:
+                            if subelemento2.tag == 'nombre':
+                                robots.agregarRobot(subelemento2.attrib['tipo'], subelemento2.attrib['capacidad'], subelemento2.text)
+                        ciudades.agregar(nombre, unidades, robots)   '''         
             print("")
-            print("Ciudades encontradas")
-            ciudades.mostrarElementos()           
+            print("-----Ciudades encontradas -----")
+            print("")
+            ciudades.mostrarElementos()
+            print("") 
+            print("----Robots encontrados----") 
             time.sleep(0.5)
         except:
             print("")
@@ -62,50 +74,61 @@ def cargarArchivo():
         print("El archivo cargado no es compatible con un .xml")
 
 def insertaTodo():
-    print(" Ciudades para graficar")
-    print("")
-    if ciudades.largo  == 0:
-        print("No hay Ciudades ingresados")
-    else:
-        print("Ciudades Disponibles")
-        for i in range (1, ciudades.largo+1):
-            print("- ", ciudades.getCiudad(i).nombre)
+    try:
+        global nuevonombre
         print("")
-        print("Escriba el nombre de la Ciudad a graficar:")
-        nombreCiudad = input("- ")
-        Ciudad = ciudades.buscarCiudad(nombreCiudad)
-        if Ciudad is None:
-            print("")
-            print("¡Error!")
-            print("La ciudad ingresada no existe")
-            print("")
+        print(" Ciudades Disponibles para graficar")
+        print("")
+        time.sleep(0.5)
+        if ciudades.largo  == 0:
+            print("No hay Ciudades ingresados")
         else:
-            print("Nombre elegido: ", nombreCiudad)
-    with open("Salida/" + nombreCiudad + ".txt") as archivo:
-        l = 0
-        c = 0
-        lineas = archivo.readlines()
-        for linea in lineas:
-            columnas = linea
-            l += 1
-            for col in columnas:
-                if col != '\n':
-                    c += 1
-                    matriz.insert(l, c, col)
+            for i in range (1, ciudades.largo+1):
+                print("- ", ciudades.getCiudad(i).nombre)
+            print("")
+            print("Escriba el nombre de la Ciudad a graficar:")
+            nombreCiudad = input("- ")
+            Ciudad = ciudades.buscarCiudad(nombreCiudad)
+            if Ciudad is None:
+                print("")
+                print("¡Error!")
+                print("La ciudad ingresada no existe")
+                print("")
+            else:
+                print("Nombre elegido: ", nombreCiudad)
+                print("")
+                print("Generando grafica.........")
+                print("")
+                time.sleep(0.5)
+        with open("Salida/" + nombreCiudad + ".txt") as archivo:
+            l = 0
             c = 0
-            matriz.graficarNeato(nombreCiudad)
-            nuevonombre = "matriz_"+nombreCiudad
-    webbrowser.open("Grafico/" + nuevonombre + ".pdf")
+            lineas = archivo.readlines()
+            for linea in lineas:
+                columnas = linea.replace('"','')
+                l += 1
+                for col in columnas:
+                    if col != '\n':
+                        c += 1
+                        matriz.insert(l, c, col)
+                c = 0
+                matriz.graficarNeato(nombreCiudad, Ciudad)
+                nuevonombre = "matriz_"+nombreCiudad
+        print("Ciudad Grafica con exito")
+        webbrowser.open(nuevonombre + ".pdf")
+    except:
+        print("")
+        print("Vuelva a elegir una opcion")
 
 
 def menu():
     opcion = ''
     while opcion != '5':
         print("------Menu principal------")
-        print("1. Cargar archivo")
-        print("2. Procesar archivo")
+        print("1. Cargar Ciudades")
+        print("2. Realizar Misiones")
         print("3. Escribir archivo de salida")
-        print("4. Generar grafica")
+        print("4. Graficar Ciudad")
         print("5. Salida")
         opcion = input("Ingrese una opción: ")
 
@@ -118,6 +141,7 @@ def menu():
             print("Archivo de salida" +"\n" )
         elif opcion == '4':
             insertaTodo()
+            #webbrowser.open("Grafico/" + nuevonombre + ".pdf")
             print("")
         elif opcion != "5":
             print("Ingrese una opcion correcta" +"\n" )

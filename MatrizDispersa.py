@@ -1,3 +1,4 @@
+from graphviz import view
 from Nodo_Encabezado import Nodo_Encabezado
 from Lista_Encabezado import Lista_Encabezado
 import os
@@ -102,7 +103,7 @@ class MatrizDispersa():
         ##------ Fin de insercion
 
 
-    def graficarNeato(self, nombre):
+    def graficarNeato(self, nombre, ciudad):
         contenido = '''digraph G{
     node[shape=box, width=0.7, height=0.7, fontname="Arial", fillcolor="white", style=filled]
     edge[style = "bold"]
@@ -170,10 +171,15 @@ class MatrizDispersa():
                     contenido += '\n\tnode[label=" " fillcolor="gray" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
                         posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
                     )
+                elif  ciudad.getUnidades().buscarUnidad(pivote_celda.coordenadaX,pivote_celda.coordenadaY) != False:
+                    contenido += '\n\tnode[label=" " fillcolor="red" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
+                        posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
+                    )
                 else:
                     contenido += '\n\tnode[label=" " fillcolor="white" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
                         posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
                     ) 
+                
                 pivote_celda = pivote_celda.derecha
             
             pivote_celda = pivote.acceso
@@ -211,9 +217,8 @@ class MatrizDispersa():
         dot = "Grafico/" + "matriz_{}_dot.txt".format(nombre)
         with open(dot, 'w') as grafo:
             grafo.write(contenido)
-        result = "Grafico/" + "matriz_{}.pdf".format(nombre)
+        result ="matriz_{}.pdf".format(nombre)
         os.system("neato -Tpdf " + dot + " -o " + result)
-        #webbrowser.open(result)
 
 
     def graficarDot(self, nombre):
@@ -326,6 +331,7 @@ class MatrizDispersa():
         dot = "Grafico/"+ "matriz_{}_dot.txt".format(nombre)
         with open(dot, 'w') as f:
             f.write(grafo)
-        result =  "Grafico/" + "matriz_{}.pdf".format(nombre)
+        result = "matriz_{}.pdf".format(nombre)
         os.system("dot -Tpdf " + dot + " -o " + result)
+        
         
