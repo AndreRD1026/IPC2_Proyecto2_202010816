@@ -1,0 +1,1 @@
+En esta carpeta deben salir los archivos para gráficar.
