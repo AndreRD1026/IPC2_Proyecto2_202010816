@@ -1,4 +1,3 @@
-import gc
 import xml.etree.ElementTree as ET
 from listaSimpleCiudad import ListaSimple as listaciudad
 from Lista_UM import Lista_UM
@@ -8,7 +7,7 @@ import time
 from MatrizDispersa import MatrizDispersa
 import webbrowser
 
-capacidad_combate = 0
+capacidad_combate = 99999
 ciudades = listaciudad()
 robots = Lista_Robots()
 
@@ -45,8 +44,8 @@ def cargarArchivo():
                         for subelemento1 in subelemento:
                             if subelemento1.tag == 'nombre':
                                 nombre = subelemento1.text
-                                #doc = open("Salida/" + subelemento1.text + ".txt", "w")
-                                doc = open(subelemento1.text + ".txt", "w")
+                                doc = open("Salida/" + subelemento1.text + ".txt", "w")
+                                #doc = open(subelemento1.text + ".txt", "w")
                             if subelemento1.tag == 'fila':
                                 doc.write(subelemento1.text + '\n')
                             if subelemento1.tag == 'unidadMilitar':
@@ -62,9 +61,6 @@ def cargarArchivo():
                                     robots.agregarRobot(subelemento1.attrib['tipo'], int(subelemento1.attrib['capacidad']), subelemento1.text)
                                 else:
                                     robots.agregarRobot(subelemento1.attrib['tipo'],int(0), subelemento1.text)
-                            print(robots.largoRobot)
-
-
             print("")
             print("-----Ciudades encontradas -----")
             print("")
@@ -85,41 +81,108 @@ def cargarArchivo():
 
 
 def realizarmision():
+    global ciudad
     ciudad = buscarciudad()
     print("")
-    print("Misiones Disponibles")
+    print("----Misiones Disponibles----")
     print("1. Rescate")
     print("2. Extracción de recursos")
     print("")
-    nombremision = input("Elija una opcion: ")
+    nombremision = input("Elija una misión: ")
+    print("")
     if nombremision == '1':
-        print("Mision de Rescate")
+        print("--Mision de Rescate--")
         print("")
-        print("-----Robots Disponibles-----""\n")
-        if robots.obtenerTipoRescue() == 0:
-        
-            print("No existen robots para esta misión")
-        else:
-            nombrerobot = input("\n""Escriba el nombre del robot - ")
-            if robots.buscarRobotmision(nombrerobot, 'ChapinRescue') != False:
-                print("Si existe")
-
-                print(ciudad.getUnidadesCiviles())
+        if ciudad.getUnidadesCiviles() > 0: 
+            print("-----Robots Disponibles-----""\n")
+            if robots.obtenerTipoRescue() == 0:
+                print("¡¡ Ha ocurrido un error !!")
+                print("No existen robots para esta misión")
             else:
-                print("El robot no ha sido encontrado")
+                nombrerobot = input("\n""Escriba el nombre del robot - ")
+                if robots.buscarRobotmision(nombrerobot, 'ChapinRescue') != False:
+                    print("")
+                    print("---Unidades Civiles disponibles---")
+                    ciudad.mostrarUC()
+                    recorrerciudad(ciudad)
+
+                else:
+                    print("El robot no ha sido encontrado")
+        else:
+            print("Lo sentimos, la ciudad no cuenta con unidades civiles para completar la misión")
             
     if nombremision == '2':
-        print("Mision de Extracción de Recursos")
+        print("---Misión de Extracción de Recursos---")
         print("")
-        print("-----Robots Disponibles-----")
-        if robots.obtenerTipoFighter() == 0:
-            print("No existen robots para esta misión")
-        else:
-            nombrerobot1 = input("\n""Escriba el nombre del robot - ")
-            if robots.buscarRobotmision(nombrerobot1, 'ChapinFighter') != False:
-                print("Si existe")
+        if ciudad.getRecursos() > 0:
+            print("-----Robots Disponibles-----")
+            if robots.obtenerTipoFighter() == 0:
+                print("¡¡ Ha ocurrido un error !!")
+                print("No existen robots para esta misión")
             else:
-                print("El robot no ha sido encontrado")
+                nombrerobot1 = input("\n""Escriba el nombre del robot - ")
+                if robots.buscarRobotmision(nombrerobot1, 'ChapinFighter') != False:
+                    print("")
+                    print("---Recursos disponibles---")
+                    ciudad.mostrarRecurso()
+                else:
+                    print("El robot no ha sido encontrado")
+        else:
+            print("Lo sentimos, la ciudad no cuenta con recursos para completar la misión")
+
+
+def recorrerciudad(ciudad):
+    global Civilfinal
+    print("")
+    coordenadax = input("Ingrese la fila: ")
+    coordenaday = input("Ingrese la columna: ")
+    print("Seleccionó: ", coordenadax, coordenaday)
+    #ciudad.buscarUC(coordenadax, coordenaday)
+    
+    if ciudad.buscarUC(coordenadax, coordenaday) is False:
+        print("No ingresó una coordenada correcta")
+    else:
+        print("Examinando el camino hacia la coordenada")
+        ciudad.mostrarEntrada()
+        Civilfinal = ciudad.buscarUC(coordenadax, coordenaday)
+        misionCivil()
+
+    
+
+
+def misionCivil():
+    print("entra a mision")  
+    #ciudad.buscarEntrada()
+    entrada = ciudad.buscarEntrada()
+    llega = False
+    while llega is False:
+        if entrada.arriba == Civilfinal:
+            break
+        elif entrada.izquierda == Civilfinal:
+            break
+        elif entrada.derecha == Civilfinal:
+            break
+        elif entrada.abajo == Civilfinal:
+            break
+        
+        elif entrada.izquierda.caracter == ' ':
+            entrada.izquierda.caracter = '='
+            entrada = entrada.izquierda
+        elif entrada.abajo.caracter == ' ':
+            entrada.abajo.caracter = '='
+            entrada = entrada.abajo
+        elif entrada.arriba.caracter == ' ':
+            entrada.arriba.caracter = '='
+            entrada = entrada.arriba
+        elif entrada.derecha.caracter == ' ':
+            entrada.derecha.caracter = '='
+            entrada = entrada.derecha
+        
+        
+        
+        
+    ciudad.graficarNeatoR(ciudad.nombre, ciudad)
+
 
 
 
@@ -128,7 +191,7 @@ def insertaTodo():
         global nuevonombre
         
         print("")
-        print(" Ciudades Disponibles para graficar")
+        print("---Ciudades Disponibles para graficar---")
         print("")
         time.sleep(0.5)
         if ciudades.largo  == 0:
@@ -151,8 +214,8 @@ def insertaTodo():
                 print("Generando grafica.........")
                 print("")
                 time.sleep(0.5)
-        #with open("Salida/" + nombreCiudad + ".txt") as archivo:
-                with open(nombreCiudad + ".txt") as archivo:
+                with open("Salida/" + nombreCiudad + ".txt") as archivo:
+                #with open(nombreCiudad + ".txt") as archivo:
                     l = 0
                     c = 0
                     lineas = archivo.readlines()
@@ -173,10 +236,11 @@ def insertaTodo():
         print("Vuelva a elegir una opcion")
 
 def buscarciudad():
+    global matriz
+    global nombreCiudad
     try:
-    
         print("")
-        print(" Ciudades Disponibles para graficar")
+        print("---Ciudades Disponibles---")
         print("")
         time.sleep(0.5)
         if ciudades.largo  == 0:
@@ -185,7 +249,7 @@ def buscarciudad():
             for i in range (1, ciudades.largo+1):
                 print("- ", ciudades.getCiudad(i).nombre)
             print("")
-            print("Escriba el nombre de la Ciudad a graficar:")
+            print("Escriba el nombre de la Ciudad para realizar una misión:")
             nombreCiudad = input("- ")
             matriz = ciudades.buscarCiudad(nombreCiudad)
             if matriz is None:
@@ -197,7 +261,7 @@ def buscarciudad():
                 #print("Nombre elegido: ", nombreCiudad)
                 print("")
                 time.sleep(0.5)
-                with open(nombreCiudad + ".txt") as archivo:
+                with open("Salida/" + nombreCiudad + ".txt") as archivo:
                     l = 0
                     c = 0
                     lineas = archivo.readlines()
@@ -210,11 +274,9 @@ def buscarciudad():
                                 matriz.insert(l, c, col)
                         c = 0
                         matriz.graficarNeatoR(nombreCiudad, matriz)
-                #nuevonombre = "matriz_"+nombreCiudad
-                #print("Ciudad Grafica con exito")
     except:
-        print("")
-        print("Vuelva a elegir una opcion")
+       print("")
+       print("Vuelva a elegir una opcion")
     return matriz
 
 

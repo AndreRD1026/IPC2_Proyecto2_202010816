@@ -34,6 +34,66 @@ class MatrizDispersa():
     def getUnidadesCiviles(self):
         return self.civil
 
+    def getRecursos(self):
+        return self.recursos
+
+
+    def mostrarUC(self):
+        tmp = self.filas.primero
+        while tmp is not None:
+            nodoCivil = tmp.acceso
+            while nodoCivil is not None:
+                if nodoCivil.caracter == 'C':
+                    print("X: " + str(nodoCivil.coordenadaX), "Y: " + str(nodoCivil.coordenadaY))
+                nodoCivil = nodoCivil.derecha
+            tmp = tmp.siguiente
+
+    def buscarUC(self, coordenadaX, coordenadaY):
+        tmp = self.filas.primero
+        while tmp is not None:
+            nodoCivil = tmp.acceso
+            while nodoCivil is not None:
+                if str(nodoCivil.coordenadaX) == str(coordenadaX) and str(nodoCivil.coordenadaY) == str(coordenadaY) :
+                    #print("X: " + str(nodoCivil.coordenadaX), "Y: " + str(nodoCivil.coordenadaY))
+                    return nodoCivil
+                nodoCivil = nodoCivil.derecha
+            tmp = tmp.siguiente
+        return False
+
+    def mostrarEntrada(self):
+        tmp = self.filas.primero
+        while tmp is not None:
+            nodoEntrada = tmp.acceso
+            while nodoEntrada is not None:
+                if nodoEntrada.caracter == 'E':
+                    print("Pos X: " + str(nodoEntrada.coordenadaX), " Pos Y: " + str(nodoEntrada.coordenadaY))
+                nodoEntrada = nodoEntrada.derecha
+            tmp = tmp.siguiente
+        return False
+
+    def buscarEntrada(self):
+        tmp = self.filas.primero
+        while tmp is not None:
+            nodoEntrada = tmp.acceso
+            while nodoEntrada is not None:
+                if nodoEntrada.caracter == 'E':
+                    print("Pos X: " + str(nodoEntrada.coordenadaX), " Pos Y: " + str(nodoEntrada.coordenadaY))
+                    return nodoEntrada
+                nodoEntrada = nodoEntrada.derecha
+                
+            tmp = tmp.siguiente
+        return False
+    
+    def mostrarRecurso(self):
+        tmp = self.filas.primero
+        while tmp is not None:
+            nodoRecurso = tmp.acceso
+            while nodoRecurso is not None:
+                if nodoRecurso.caracter == 'R':
+                    print("Posición X: " + str(nodoRecurso.coordenadaX), " Poisción Y: " + str(nodoRecurso.coordenadaY))
+                nodoRecurso = nodoRecurso.derecha
+            tmp = tmp.siguiente
+
 
     
     # (filas = x, columnas = y)
@@ -117,15 +177,16 @@ class MatrizDispersa():
     node[shape=box, width=0.7, height=0.7, fontname="Arial", fillcolor="white", style=filled]
     edge[style = "bold"]
     node[label = "capa:''' + str(self.capa) +'''" fillcolor="darkolivegreen1" pos = "-1,1!"]raiz;'''
-        contenido += '''label = "{}" \nfontname="Arial Black" \nfontsize="25pt" \n
-                    \n'''.format(nombre)
+        contenido += '''label = "{}" \nfontname="Arial Black" labelloc=t \nfontsize="30pt" \n \n
+                    \n'''.format(nombre + "\n")
+        
 
         # --graficar nodos ENCABEZADO
         # --graficar nodos fila
         pivote = self.filas.primero
         posx = 0
         while pivote != None:
-            contenido += '\n\tnode[label = "F{}" fillcolor="azure3" pos="-1,-{}!" shape=box]x{};'.format(pivote.id, 
+            contenido += '\n\tnode[label = "{}" fillcolor="white" pos="-1,-{}!" shape=box]x{};'.format(pivote.id, 
             posx, pivote.id)
             pivote = pivote.siguiente
             posx += 1
@@ -140,7 +201,7 @@ class MatrizDispersa():
         pivotey = self.columnas.primero
         posy = 0
         while pivotey != None:
-            contenido += '\n\tnode[label = "C{}" fillcolor="azure3" pos = "{},1!" shape=box]y{};'.format(pivotey.id, 
+            contenido += '\n\tnode[label = "{}" fillcolor="white" pos = "{},1!" shape=box]y{};'.format(pivotey.id, 
             posy, pivotey.id)
             pivotey = pivotey.siguiente
             posy += 1
@@ -173,7 +234,8 @@ class MatrizDispersa():
                         posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
                     )
                 elif pivote_celda.caracter == 'C' :
-                    ciudad.civil += 1 
+                    #ciudad.civil += 1
+                    ciudad.civil += 1
                     contenido += '\n\tnode[label=" " fillcolor="blue" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
                         posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
                     )
@@ -184,6 +246,10 @@ class MatrizDispersa():
                     )
                 elif ciudad.getUnidades().buscarUnidad(pivote_celda.coordenadaX,pivote_celda.coordenadaY) != False:
                     contenido += '\n\tnode[label=" " fillcolor="red" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
+                        posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
+                    )
+                elif pivote_celda.caracter == '=':
+                    contenido += '\n\tnode[label=" " fillcolor="yellow" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
                         posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
                     )
                 else:
@@ -219,10 +285,10 @@ class MatrizDispersa():
             contenido += '\n\ty{}->i{}_{}[dir=none color="white"];'.format(pivote.id, pivote.acceso.coordenadaX, pivote.acceso.coordenadaY)
             contenido += '\n\ty{}->i{}_{}[dir=none color="white"];'.format(pivote.id, pivote.acceso.coordenadaX, pivote.acceso.coordenadaY)
             pivote = pivote.siguiente
-                
-        contenido += '\n}'
-        #--- se genera DOT y se procede a ecjetuar el comando
-        dot = "matriz_{}_dot.txt".format(nombre)
+        #contenido += '\n\t'
+        #contenido += 'end[shape=Msquare];'       
+        contenido += '\n}' 
+        dot = "Grafico/" + "matriz_{}_dot.txt".format(nombre)
         with open(dot, 'w') as grafo:
             grafo.write(contenido)
         result = "matriz_{}.pdf".format(nombre)
