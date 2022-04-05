@@ -95,6 +95,17 @@ class MatrizDispersa():
             tmp = tmp.siguiente
 
 
+
+    def limpiar(self):
+        tmp = self.filas.primero
+        while tmp is not None:
+            nodoCivil = tmp.acceso
+            while nodoCivil is not None:
+                if nodoCivil.caracter == '=':
+                    nodoCivil.caracter = ' '
+                nodoCivil = nodoCivil.derecha
+            tmp = tmp.siguiente
+
     
     # (filas = x, columnas = y)
     def insert(self, pos_x, pos_y, caracter):
@@ -244,7 +255,8 @@ class MatrizDispersa():
                     contenido += '\n\tnode[label=" " fillcolor="gray" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
                         posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
                     )
-                elif ciudad.getUnidades().buscarUnidad(pivote_celda.coordenadaX,pivote_celda.coordenadaY) != False:
+                elif ciudad.getUnidades().buscarUnidad (pivote_celda.coordenadaX,pivote_celda.coordenadaY) != False:
+                    pivote_celda.caracter = 'UM'
                     contenido += '\n\tnode[label=" " fillcolor="red" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
                         posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
                     )
