@@ -72,7 +72,7 @@ def cargarArchivo():
         except:
             print("")
             print("¡¡ ERROR !!")
-            print("Ha ocurrido un erorr en la carga del archivo")
+            print("Ha ocurrido un error en la carga del archivo")
 
     else:
         print("¡¡ ERROR !!")
@@ -143,190 +143,213 @@ def recorrerciudad(ciudad):
     if ciudad.buscarUC(coordenadax, coordenaday) is False:
         print("No ingresó una coordenada correcta")
     else:
+        
         print("Examinando el camino hacia la coordenada")
         ciudad.mostrarEntrada()
         Civilfinal = ciudad.buscarUC(coordenadax, coordenaday)
-        misionCivil()
+        #misionCivil()
+        tmp = ciudad.filas.primero
+        while tmp is not None:
+            nodoEntrada = tmp.acceso
+            while nodoEntrada is not None:
+                if nodoEntrada.caracter == 'E':
+                    if misionCivil(nodoEntrada) == True:
+                        break
+                    #print("Pos X: " + str(nodoEntrada.coordenadaX), " Pos Y: " + str(nodoEntrada.coordenadaY))
+                    #return nodoEntrada
+                nodoEntrada = nodoEntrada.derecha
+                
+            tmp = tmp.siguiente
+        #return False
 
     
 
 
-def misionCivil():
+def misionCivil(entrada):
+    ciudad.limpiar()
     print("entra a mision")  
     #ciudad.buscarEntrada()
-    entrada = ciudad.buscarEntrada()
+    #entrada = ciudad.buscarEntrada()
     llega = False
     while llega is False:
-        if entrada.arriba == Civilfinal:
+        if entrada != None and entrada.arriba == Civilfinal:
+            llega = True
+            ciudad.graficarNeatoR1(ciudad.nombre, ciudad, nombrerobot)
+            return True
+            break     
+        elif entrada != None and entrada.izquierda == Civilfinal:
+            llega = True
+            ciudad.graficarNeatoR1(ciudad.nombre, ciudad, nombrerobot)
+            return True
             break
-        elif entrada.izquierda == Civilfinal:
+        elif entrada != None and entrada.derecha == Civilfinal:
+            llega = True
+            ciudad.graficarNeatoR1(ciudad.nombre, ciudad, nombrerobot)
+            return True
             break
-        elif entrada.derecha == Civilfinal:
-            break
-        elif entrada.abajo == Civilfinal:
+        elif entrada != None and entrada.abajo == Civilfinal:
+            llega = True
+            ciudad.graficarNeatoR1(ciudad.nombre, ciudad, nombrerobot)
+            return True
             break
 
-        elif  entrada.derecha != None and entrada.derecha != Civilfinal :
-            if entrada.derecha.caracter == ' ':
+
+        #Arriba - izquierda
+        elif entrada != None and entrada.coordenadaY <= Civilfinal.coordenadaY and entrada.coordenadaX <= Civilfinal.coordenadaX:
+            if entrada.derecha != None and entrada.derecha.caracter == ' ':
                 entrada.derecha.caracter = '='
                 entrada = entrada.derecha
-            elif entrada.arriba.caracter == ' ':
-                entrada.arriba.caracter = '='
-                entrada = entrada.arriba
-            elif entrada.abajo.caracter == ' ':
+            elif entrada.abajo != None and entrada.abajo.caracter == ' ':
                 entrada.abajo.caracter = '='
                 entrada = entrada.abajo
-            elif entrada.izquierda.caracter == ' ':
+            elif entrada.abajo != None and entrada.abajo.caracter == 'C':
+                entrada.abajo.caracter = 'C'
+                entrada = entrada.abajo
+            elif entrada.arriba != None and entrada.arriba.caracter == ' ':
+                entrada.arriba.caracter = '='
+                entrada = entrada.arriba            
+            elif entrada.izquierda != None and entrada.izquierda.caracter == ' ':
                 entrada.izquierda.caracter = '='
                 entrada = entrada.izquierda
-            elif entrada.derecha.caracter != ' ':
-                entrada.izquierda.caracter = '$'
+            #Regresos
+            elif entrada.derecha != None  and entrada.derecha.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
                 entrada = entrada.izquierda
-            elif entrada.izquierda.caracter != ' ':
-                entrada.derecha.caracter = '$'
+            elif entrada.izquierda != None  and entrada.izquierda.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
                 entrada = entrada.derecha
-            elif entrada.arriba.caracter != ' ':
-                entrada.abajo.caracter = '$'
+            elif entrada.arriba != None  and entrada.arriba.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
                 entrada = entrada.abajo
-            elif entrada.abajo.caracter != ' ':
-                entrada.arriba.caracter = '$'
+            elif entrada.abajo != None  and entrada.abajo.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
                 entrada = entrada.arriba
+            #elif entrada.derecha != None and entrada.derecha.caracter == 'UM':
+            #    entrada.izquierda.
 
-        elif  entrada.derecha != None and entrada.derecha != Civilfinal :
-            if entrada.derecha.caracter == ' ':
-                entrada.derecha.caracter = '='
-                entrada = entrada.derecha
-            elif entrada.arriba.caracter == ' ':
+
+        #Abajo - Derecha
+        elif entrada != None and entrada.coordenadaY >= Civilfinal.coordenadaY and entrada.coordenadaX >= Civilfinal.coordenadaX:
+            if entrada.izquierda != None and entrada.izquierda.caracter == ' ':
+                entrada.izquierda.caracter = '='
+                entrada = entrada.izquierda
+            elif entrada.arriba != None and entrada.arriba.caracter == ' ':
                 entrada.arriba.caracter = '='
                 entrada = entrada.arriba
-            elif entrada.abajo.caracter == ' ':
+            elif entrada.abajo != None and entrada.abajo.caracter == ' ':
                 entrada.abajo.caracter = '='
                 entrada = entrada.abajo
-            elif entrada.derecha.caracter != ' ':
-                entrada.izquierda.caracter = '$'
-                entrada = entrada.izquierda
-            elif entrada.arriba.caracter != ' ':
-                entrada.abajo.caracter = '$'
+            elif entrada.abajo != None and entrada.abajo.caracter == 'C':
+                entrada.abajo.caracter = 'C'
                 entrada = entrada.abajo
-            elif entrada.abajo.caracter != ' ':
-                entrada.arriba.caracter = '$'
+            elif entrada.derecha != None and entrada.derecha.caracter == ' ':
+                entrada.derecha.caracter = '='
+                entrada = entrada.derecha
+            #Regresos
+            elif entrada.izquierda != None  and entrada.izquierda.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.derecha != None  and entrada.derecha.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.arriba != None  and entrada.arriba.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
+                entrada = entrada.abajo
+            elif entrada.abajo != None  and entrada.abajo.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
+                entrada = entrada.arriba
+
+        #Arriba - derecha
+        elif entrada != None and entrada.coordenadaX <= Civilfinal.coordenadaX and entrada.coordenadaY >= Civilfinal.coordenadaY :
+            if entrada.abajo != None and entrada.abajo.caracter == ' ':
+                entrada.abajo.caracter = '='
+                entrada = entrada.abajo
+            elif entrada.izquierda != None and entrada.izquierda.caracter == ' ':
+                entrada.izquierda.caracter = '='
+                entrada = entrada.izquierda
+            elif entrada.arriba != None and entrada.arriba.caracter == ' ':
+                entrada.arriba.caracter = '='
+                entrada = entrada.arriba
+            elif entrada.abajo != None and entrada.abajo.caracter == 'C':
+                entrada.abajo.caracter = 'C'
+                entrada = entrada.abajo
+            elif entrada.derecha != None and entrada.derecha.caracter == ' ':
+                entrada.derecha.caracter = '='
+                entrada = entrada.derecha
+            #Regresos
+            elif entrada.abajo != None  and entrada.abajo.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
+                entrada = entrada.arriba
+            elif entrada.derecha != None  and entrada.derecha.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.izquierda != None  and entrada.izquierda.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.arriba != None  and entrada.arriba.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
+                entrada = entrada.abajo
+
+
+        #Abajo - izquierda
+        elif entrada != None and entrada.coordenadaX >= Civilfinal.coordenadaX and entrada.coordenadaY <= Civilfinal.coordenadaY :
+            if entrada.arriba != None and entrada.arriba.caracter == ' ':
+                entrada.arriba.caracter = '='
+                entrada = entrada.arriba
+            elif entrada.derecha != None and entrada.derecha.caracter == ' ':
+                entrada.derecha.caracter = '='
+                entrada = entrada.derecha
+            elif entrada.izquierda != None and entrada.izquierda.caracter == ' ':
+                entrada.izquierda.caracter = '='
+                entrada = entrada.izquierda
+            elif entrada.abajo != None and entrada.abajo.caracter == ' ':
+                entrada.abajo.caracter = '='
+                entrada = entrada.abajo
+            elif entrada.abajo != None and entrada.abajo.caracter == 'C':
+                entrada.abajo.caracter = 'C'
+                entrada = entrada.abajo
+            #Regresos
+            elif entrada.arriba != None  and entrada.arriba.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
+                entrada = entrada.abajo
+            elif entrada.derecha != None  and entrada.derecha.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.izquierda != None  and entrada.izquierda.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.abajo != None  and entrada.abajo.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
                 entrada = entrada.arriba
 
         
-        # elif  entrada.abajo != None and entrada.abajo != Civilfinal :
-        #     if entrada.abajo.caracter == ' ':
-        #         entrada.abajo.caracter = '='
-        #         entrada = entrada.abajo
-        #     elif entrada.arriba.caracter == ' ':
-        #         entrada.arriba.caracter = '='
-        #         entrada = entrada.arriba
-        #     elif entrada.izquierda.caracter == ' ':
-        #         entrada.izquierda.caracter = '='
-        #         entrada = entrada.izquierda
-        #     elif entrada.derecha.caracter == ' ':
-        #         entrada.derecha.caracter = '='
-        #         entrada = entrada.derecha
-        #     elif entrada.derecha.caracter != ' ':
-        #         entrada.izquierda.caracter = '$'
-        #         entrada = entrada.izquierda
-        #     elif entrada.izquierda.caracter != ' ':
-        #         entrada.derecha.caracter = '$'
-        #         entrada = entrada.derecha
-        #     elif entrada.arriba.caracter != ' ':
-        #         entrada.abajo.caracter = '$'
-        #         entrada = entrada.abajo
-        #     elif entrada.abajo.caracter != ' ':
-        #         entrada.arriba.caracter = '$'
-        #         entrada = entrada.arriba
-
-        # elif  entrada.arriba != None and entrada.arriba != Civilfinal :
-        #     if entrada.arriba.caracter == ' ':
-        #         entrada.arriba.caracter = '='
-        #         entrada = entrada.arriba
-        #     elif entrada.derecha.caracter == ' ':
-        #         entrada.derecha.caracter = '='
-        #         entrada = entrada.derecha
-        #     elif entrada.abajo.caracter == ' ':
-        #         entrada.abajo.caracter = '='
-        #         entrada = entrada.abajo
-        #     elif entrada.izquierda.caracter == ' ':
-        #         entrada.izquierda.caracter = '='
-        #         entrada = entrada.izquierda
-        #         #break
-        #     elif entrada.derecha.caracter != ' ':
-        #         entrada.izquierda.caracter = ' '
-        #         entrada = entrada.izquierda
-        #     elif entrada.izquierda.caracter != ' ':
-        #         entrada.derecha.caracter = ' '
-        #         entrada = entrada.derecha
-        #     elif entrada.arriba.caracter != ' ':
-        #         entrada.abajo.caracter = ' '
-        #         entrada = entrada.abajo
-        #     elif entrada.abajo.caracter != ' ':
-        #         entrada.arriba.caracter = ' '
-        #         entrada = entrada.arriba
         
 
+        else:
+            print("Error, la misión no pudo ser completada")
+            return False
+            break
 
-        # elif  entrada.izquierda != None and entrada.izquierda != Civilfinal :
-        #     if entrada.izquierda.caracter == ' ':
-        #         entrada.izquierda.caracter = '='
-        #         entrada = entrada.izquierda
-        #     elif entrada.abajo.caracter == ' ':
-        #         entrada.abajo.caracter = '='
-        #         entrada = entrada.abajo
-        #     elif entrada.arriba.caracter == ' ':
-        #         entrada.arriba.caracter = '='
-        #         entrada = entrada.arriba
-        #     elif entrada.derecha.caracter == ' ':
-        #         entrada.derecha.caracter = '='
-        #         entrada = entrada.derecha
-        #     elif entrada.derecha.caracter != ' ':
-        #         entrada.izquierda.caracter = ' '
-        #         entrada = entrada.izquierda
-        #     elif entrada.izquierda.caracter != ' ':
-        #         entrada.derecha.caracter = ' '
-        #         entrada = entrada.derecha
-        #     elif entrada.arriba.caracter != ' ':
-        #         entrada.abajo.caracter = ' '
-        #         entrada = entrada.abajo
-        #     elif entrada.abajo.caracter != ' ':
-        #         entrada.arriba.caracter = ' '
-        #         entrada = entrada.arriba
 
-        elif  entrada.derecha == None and entrada.derecha != Civilfinal :
-                entrada.izquierda.caracter = '='
-                entrada = entrada.izquierda
-            # elif entrada.arriba.caracter == ' ':
-            #     entrada.arriba.caracter = '='
-            #     entrada = entrada.arriba
-            # elif entrada.abajo.caracter == ' ':
-            #     entrada.abajo.caracter = '='
-            #     entrada = entrada.abajo
-            # elif entrada.izquierda.caracter == ' ':
-            #     entrada.izquierda.caracter = '='
-            #     entrada = entrada.izquierda
-            # elif entrada.derecha.caracter != ' ':
-            #     entrada.izquierda.caracter = ' '
-            #     entrada = entrada.izquierda
-            # elif entrada.izquierda.caracter != ' ':
-            #     entrada.derecha.caracter = ' '
-            #     entrada = entrada.derecha
-            # elif entrada.arriba.caracter != ' ':
-            #     entrada.abajo.caracter = ' '
-            #     entrada = entrada.abajo
-            # elif entrada.abajo.caracter != ' ':
-            #     entrada.arriba.caracter = ' '
-            #     entrada = entrada.arriba
-
-        elif entrada.izquierda == None and entrada.izquierda != Civilfinal:
-                if entrada.derecha.caracter == ' ':
-                    entrada.derecha.caracter == '$'
-                    entrada = entrada.derecha
-            
     
-    ciudad.graficarNeatoR1(ciudad.nombre, ciudad, nombrerobot)
-    webbrowser.open("matriz_"+ ciudad.nombre + "_mision")
+    
+    #webbrowser.open("matriz_"+ ciudad.nombre + "_mision")
 
 
 
