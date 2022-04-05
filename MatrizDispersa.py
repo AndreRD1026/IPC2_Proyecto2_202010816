@@ -174,8 +174,8 @@ class MatrizDispersa():
 
     def graficarNeatoR(self, nombre, ciudad):
         contenido = '''digraph G{
-    node[shape=box, width=0.7, height=0.7, fontname="Arial", fillcolor="white", style=filled]
-    edge[style = "bold"]
+    node[shape=box, width=1, height=1, fontname="Arial", fillcolor="white", style=filled]
+    edge[style = "invis" arrowhead="none" arrowtail="none"]
     node[label = "capa:''' + str(self.capa) +'''" fillcolor="darkolivegreen1" pos = "-1,1!"]raiz;'''
         contenido += '''label = "{}" \nfontname="Arial Black" labelloc=t \nfontsize="30pt" \n \n
                     \n'''.format(nombre + "\n")
@@ -292,5 +292,135 @@ class MatrizDispersa():
         with open(dot, 'w') as grafo:
             grafo.write(contenido)
         result = "matriz_{}.pdf".format(nombre)
+        os.system("neato -Tpdf " + dot + " -o " + result)
+        #webbrowser.open(result)
+
+
+    def graficarNeatoR1(self, nombre, ciudad, nombrerobot):
+        contenido = '''digraph G{
+    node[shape=box, width=1, height=1, fontname="Arial", fillcolor="white", style=filled]
+    edge[style = "invis" arrowhead="none" arrowtail="none"]
+    node[label = "capa:''' + str(self.capa) +'''" fillcolor="darkolivegreen1" pos = "-1,1!"]raiz;'''
+        contenido += '''label = "{}" \nfontname="Arial Black" labelloc=t \nfontsize="30pt" \n \n
+                    \n'''.format(nombre + "\n")
+        contenido += '''label = "{}" \nfontname="Arial Black"  \nfontsize="30pt" \n \n
+                    \n'''.format("Robot usado : ", nombrerobot)
+        
+
+        # --graficar nodos ENCABEZADO
+        # --graficar nodos fila
+        pivote = self.filas.primero
+        posx = 0
+        while pivote != None:
+            contenido += '\n\tnode[label = "{}" fillcolor="white" pos="-1,-{}!" shape=box]x{};'.format(pivote.id, 
+            posx, pivote.id)
+            pivote = pivote.siguiente
+            posx += 1
+        pivote = self.filas.primero
+        while pivote.siguiente != None:
+            contenido += '\n\tx{}->x{}[dir=none color="white"];'.format(pivote.id, pivote.siguiente.id)
+            contenido += '\n\tx{}->x{}[dir=none color="white"];'.format(pivote.id, pivote.siguiente.id)
+            pivote = pivote.siguiente
+        contenido += '\n\traiz->x{}[dir=none color="white"];'.format(self.filas.primero.id)
+
+        # --graficar nodos columna
+        pivotey = self.columnas.primero
+        posy = 0
+        while pivotey != None:
+            contenido += '\n\tnode[label = "{}" fillcolor="white" pos = "{},1!" shape=box]y{};'.format(pivotey.id, 
+            posy, pivotey.id)
+            pivotey = pivotey.siguiente
+            posy += 1
+        pivotey = self.columnas.primero
+        while pivotey.siguiente != None:
+            contenido += '\n\ty{}->y{}[dir=none color="white"];'.format(pivotey.id, pivotey.siguiente.id)
+            contenido += '\n\ty{}->y{}[dir=none color="white"];'.format(pivotey.id, pivotey.siguiente.id)
+            pivotey = pivotey.siguiente
+        contenido += '\n\traiz->y{}[dir=none color="white"];'.format(self.columnas.primero.id)
+
+        #ya con las cabeceras graficadas, lo siguiente es los nodos internos, o nodosCelda
+        pivote = self.filas.primero
+        posx = 0
+        while pivote != None:
+            pivote_celda : Nodo_Interno = pivote.acceso
+            while pivote_celda != None:
+                # --- buscamos posy
+                pivotey = self.columnas.primero
+                posy_celda = 0
+                while pivotey != None:
+                    if pivotey.id == pivote_celda.coordenadaY: break
+                    posy_celda += 1
+                    pivotey = pivotey.siguiente
+                if pivote_celda.caracter == '*':
+                    contenido += '\n\tnode[label="*" fillcolor="black" pos="{},-{}!" shape=box]i{}_{};'.format( #pos="{},-{}!"
+                        posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
+                    )
+                elif pivote_celda.caracter == 'E':
+                    contenido += '\n\tnode[label=" " fillcolor="green" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
+                        posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
+                    )
+                elif pivote_celda.caracter == 'C' :
+                    #ciudad.civil += 1
+                    ciudad.civil += 1
+                    contenido += '\n\tnode[label=" " fillcolor="blue" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
+                        posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
+                    )
+                elif pivote_celda.caracter == 'R':
+                    ciudad.recursos += 1
+                    contenido += '\n\tnode[label=" " fillcolor="gray" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
+                        posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
+                    )
+                elif ciudad.getUnidades().buscarUnidad(pivote_celda.coordenadaX,pivote_celda.coordenadaY) != False:
+                    contenido += '\n\tnode[label=" " fillcolor="red" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
+                        posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
+                    )
+                elif pivote_celda.caracter == '=':
+                    contenido += '\n\tnode[label=" " fillcolor="yellow" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
+                        posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
+                    )
+                elif pivote_celda.caracter == '$':
+                    contenido += '\n\tnode[label=" " fillcolor="white" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
+                        posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
+                    )
+                else:
+                    contenido += '\n\tnode[label=" " fillcolor="white" pos="{},-{}!" shape=box]i{}_{};'.format( # pos="{},-{}!"
+                        posy_celda, posx, pivote_celda.coordenadaX, pivote_celda.coordenadaY
+                    ) 
+                pivote_celda = pivote_celda.derecha
+            
+            pivote_celda = pivote.acceso
+            while pivote_celda != None:
+                if pivote_celda.derecha != None:
+                    contenido += '\n\ti{}_{}->i{}_{}[dir=none color="white"];'.format(pivote_celda.coordenadaX, pivote_celda.coordenadaY,
+                    pivote_celda.derecha.coordenadaX, pivote_celda.derecha.coordenadaY)
+                    contenido += '\n\ti{}_{}->i{}_{}[dir=none color="white"];'.format(pivote_celda.coordenadaX, pivote_celda.coordenadaY,
+                    pivote_celda.derecha.coordenadaX, pivote_celda.derecha.coordenadaY)
+                pivote_celda = pivote_celda.derecha
+        
+            contenido += '\n\tx{}->i{}_{}[dir=none color="white"];'.format(pivote.id, pivote.acceso.coordenadaX, pivote.acceso.coordenadaY)
+            contenido += '\n\tx{}->i{}_{}[dir=none color="white"];'.format(pivote.id, pivote.acceso.coordenadaX, pivote.acceso.coordenadaY)
+            pivote = pivote.siguiente
+            posx += 1
+        
+        pivote = self.columnas.primero
+        while pivote != None:
+            pivote_celda : Nodo_Interno = pivote.acceso
+            while pivote_celda != None:
+                if pivote_celda.abajo != None:
+                    contenido += '\n\ti{}_{}->i{}_{}[dir=none color="white"];'.format(pivote_celda.coordenadaX, pivote_celda.coordenadaY,
+                    pivote_celda.abajo.coordenadaX, pivote_celda.abajo.coordenadaY)
+                    contenido += '\n\ti{}_{}->i{}_{}[dir=none color="white"];'.format(pivote_celda.coordenadaX, pivote_celda.coordenadaY,
+                    pivote_celda.abajo.coordenadaX, pivote_celda.abajo.coordenadaY) 
+                pivote_celda = pivote_celda.abajo
+            contenido += '\n\ty{}->i{}_{}[dir=none color="white"];'.format(pivote.id, pivote.acceso.coordenadaX, pivote.acceso.coordenadaY)
+            contenido += '\n\ty{}->i{}_{}[dir=none color="white"];'.format(pivote.id, pivote.acceso.coordenadaX, pivote.acceso.coordenadaY)
+            pivote = pivote.siguiente
+        #contenido += '\n\t'
+        #contenido += 'end[shape=Msquare];'       
+        contenido += '\n}' 
+        dot = "Grafico/" + "matriz_{}_dot.txt".format(nombre)
+        with open(dot, 'w') as grafo:
+            grafo.write(contenido)
+        result = "matriz_{}_mision.pdf".format(nombre)
         os.system("neato -Tpdf " + dot + " -o " + result)
         #webbrowser.open(result)

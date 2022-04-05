@@ -82,6 +82,7 @@ def cargarArchivo():
 
 def realizarmision():
     global ciudad
+    global nombrerobot
     ciudad = buscarciudad()
     print("")
     print("----Misiones Disponibles----")
@@ -164,24 +165,168 @@ def misionCivil():
             break
         elif entrada.abajo == Civilfinal:
             break
+
+        elif  entrada.derecha != None and entrada.derecha != Civilfinal :
+            if entrada.derecha.caracter == ' ':
+                entrada.derecha.caracter = '='
+                entrada = entrada.derecha
+            elif entrada.arriba.caracter == ' ':
+                entrada.arriba.caracter = '='
+                entrada = entrada.arriba
+            elif entrada.abajo.caracter == ' ':
+                entrada.abajo.caracter = '='
+                entrada = entrada.abajo
+            elif entrada.izquierda.caracter == ' ':
+                entrada.izquierda.caracter = '='
+                entrada = entrada.izquierda
+            elif entrada.derecha.caracter != ' ':
+                entrada.izquierda.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.izquierda.caracter != ' ':
+                entrada.derecha.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.arriba.caracter != ' ':
+                entrada.abajo.caracter = '$'
+                entrada = entrada.abajo
+            elif entrada.abajo.caracter != ' ':
+                entrada.arriba.caracter = '$'
+                entrada = entrada.arriba
+
+        elif  entrada.derecha != None and entrada.derecha != Civilfinal :
+            if entrada.derecha.caracter == ' ':
+                entrada.derecha.caracter = '='
+                entrada = entrada.derecha
+            elif entrada.arriba.caracter == ' ':
+                entrada.arriba.caracter = '='
+                entrada = entrada.arriba
+            elif entrada.abajo.caracter == ' ':
+                entrada.abajo.caracter = '='
+                entrada = entrada.abajo
+            elif entrada.derecha.caracter != ' ':
+                entrada.izquierda.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.arriba.caracter != ' ':
+                entrada.abajo.caracter = '$'
+                entrada = entrada.abajo
+            elif entrada.abajo.caracter != ' ':
+                entrada.arriba.caracter = '$'
+                entrada = entrada.arriba
+
         
-        elif entrada.izquierda.caracter == ' ':
-            entrada.izquierda.caracter = '='
-            entrada = entrada.izquierda
-        elif entrada.abajo.caracter == ' ':
-            entrada.abajo.caracter = '='
-            entrada = entrada.abajo
-        elif entrada.arriba.caracter == ' ':
-            entrada.arriba.caracter = '='
-            entrada = entrada.arriba
-        elif entrada.derecha.caracter == ' ':
-            entrada.derecha.caracter = '='
-            entrada = entrada.derecha
+        # elif  entrada.abajo != None and entrada.abajo != Civilfinal :
+        #     if entrada.abajo.caracter == ' ':
+        #         entrada.abajo.caracter = '='
+        #         entrada = entrada.abajo
+        #     elif entrada.arriba.caracter == ' ':
+        #         entrada.arriba.caracter = '='
+        #         entrada = entrada.arriba
+        #     elif entrada.izquierda.caracter == ' ':
+        #         entrada.izquierda.caracter = '='
+        #         entrada = entrada.izquierda
+        #     elif entrada.derecha.caracter == ' ':
+        #         entrada.derecha.caracter = '='
+        #         entrada = entrada.derecha
+        #     elif entrada.derecha.caracter != ' ':
+        #         entrada.izquierda.caracter = '$'
+        #         entrada = entrada.izquierda
+        #     elif entrada.izquierda.caracter != ' ':
+        #         entrada.derecha.caracter = '$'
+        #         entrada = entrada.derecha
+        #     elif entrada.arriba.caracter != ' ':
+        #         entrada.abajo.caracter = '$'
+        #         entrada = entrada.abajo
+        #     elif entrada.abajo.caracter != ' ':
+        #         entrada.arriba.caracter = '$'
+        #         entrada = entrada.arriba
+
+        # elif  entrada.arriba != None and entrada.arriba != Civilfinal :
+        #     if entrada.arriba.caracter == ' ':
+        #         entrada.arriba.caracter = '='
+        #         entrada = entrada.arriba
+        #     elif entrada.derecha.caracter == ' ':
+        #         entrada.derecha.caracter = '='
+        #         entrada = entrada.derecha
+        #     elif entrada.abajo.caracter == ' ':
+        #         entrada.abajo.caracter = '='
+        #         entrada = entrada.abajo
+        #     elif entrada.izquierda.caracter == ' ':
+        #         entrada.izquierda.caracter = '='
+        #         entrada = entrada.izquierda
+        #         #break
+        #     elif entrada.derecha.caracter != ' ':
+        #         entrada.izquierda.caracter = ' '
+        #         entrada = entrada.izquierda
+        #     elif entrada.izquierda.caracter != ' ':
+        #         entrada.derecha.caracter = ' '
+        #         entrada = entrada.derecha
+        #     elif entrada.arriba.caracter != ' ':
+        #         entrada.abajo.caracter = ' '
+        #         entrada = entrada.abajo
+        #     elif entrada.abajo.caracter != ' ':
+        #         entrada.arriba.caracter = ' '
+        #         entrada = entrada.arriba
         
-        
-        
-        
-    ciudad.graficarNeatoR(ciudad.nombre, ciudad)
+
+
+        # elif  entrada.izquierda != None and entrada.izquierda != Civilfinal :
+        #     if entrada.izquierda.caracter == ' ':
+        #         entrada.izquierda.caracter = '='
+        #         entrada = entrada.izquierda
+        #     elif entrada.abajo.caracter == ' ':
+        #         entrada.abajo.caracter = '='
+        #         entrada = entrada.abajo
+        #     elif entrada.arriba.caracter == ' ':
+        #         entrada.arriba.caracter = '='
+        #         entrada = entrada.arriba
+        #     elif entrada.derecha.caracter == ' ':
+        #         entrada.derecha.caracter = '='
+        #         entrada = entrada.derecha
+        #     elif entrada.derecha.caracter != ' ':
+        #         entrada.izquierda.caracter = ' '
+        #         entrada = entrada.izquierda
+        #     elif entrada.izquierda.caracter != ' ':
+        #         entrada.derecha.caracter = ' '
+        #         entrada = entrada.derecha
+        #     elif entrada.arriba.caracter != ' ':
+        #         entrada.abajo.caracter = ' '
+        #         entrada = entrada.abajo
+        #     elif entrada.abajo.caracter != ' ':
+        #         entrada.arriba.caracter = ' '
+        #         entrada = entrada.arriba
+
+        elif  entrada.derecha == None and entrada.derecha != Civilfinal :
+                entrada.izquierda.caracter = '='
+                entrada = entrada.izquierda
+            # elif entrada.arriba.caracter == ' ':
+            #     entrada.arriba.caracter = '='
+            #     entrada = entrada.arriba
+            # elif entrada.abajo.caracter == ' ':
+            #     entrada.abajo.caracter = '='
+            #     entrada = entrada.abajo
+            # elif entrada.izquierda.caracter == ' ':
+            #     entrada.izquierda.caracter = '='
+            #     entrada = entrada.izquierda
+            # elif entrada.derecha.caracter != ' ':
+            #     entrada.izquierda.caracter = ' '
+            #     entrada = entrada.izquierda
+            # elif entrada.izquierda.caracter != ' ':
+            #     entrada.derecha.caracter = ' '
+            #     entrada = entrada.derecha
+            # elif entrada.arriba.caracter != ' ':
+            #     entrada.abajo.caracter = ' '
+            #     entrada = entrada.abajo
+            # elif entrada.abajo.caracter != ' ':
+            #     entrada.arriba.caracter = ' '
+            #     entrada = entrada.arriba
+
+        elif entrada.izquierda == None and entrada.izquierda != Civilfinal:
+                if entrada.derecha.caracter == ' ':
+                    entrada.derecha.caracter == '$'
+                    entrada = entrada.derecha
+            
+    
+    ciudad.graficarNeatoR1(ciudad.nombre, ciudad, nombrerobot)
+    webbrowser.open("matriz_"+ ciudad.nombre + "_mision")
 
 
 
@@ -275,8 +420,8 @@ def buscarciudad():
                         c = 0
                         matriz.graficarNeatoR(nombreCiudad, matriz)
     except:
-       print("")
-       print("Vuelva a elegir una opcion")
+        print("")
+        print("Vuelva a elegir una opcion")
     return matriz
 
 
