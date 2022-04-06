@@ -2,7 +2,6 @@ from Ciudad import Ciudad
 from UnidadMilitar import Unidad_Militar
 from Robot import Robot
 from MatrizDispersa import MatrizDispersa
-#from coordenada import Coordenada
 import time
 class ListaSimple:
     def __init__(self):
@@ -46,6 +45,27 @@ class ListaSimple:
                 return tmp 
             tmp = tmp.siguiente
         return None
+
+    
+
+    def actualizarCiudad(self, nombre):
+        tmp = self.inicio
+        while tmp is not None:
+            if tmp.nombre == nombre:
+                self.inicio = tmp.siguiente
+                tmp.siguiente = None
+                print('Ciudad ',nombre, ' ha sido actualizada')
+                break
+            elif tmp.siguiente is not None:
+                if tmp.siguiente.nombre == nombre:
+                    Nodo_a_borrar = tmp.siguiente
+                    tmp.siguiente = Nodo_a_borrar.siguiente
+                    Nodo_a_borrar.siguiente = None
+                    print('Ciudad ', nombre,' ha sido actualizada')
+                    break
+            tmp = tmp.siguiente
+
+    
     def getCiudad(self,posicion):
         contador = 1
         tmp = self.inicio

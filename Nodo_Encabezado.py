@@ -1,4 +1,3 @@
-#------------ Nodo que representa el encabezado de una fila y columna respectivamente
 class Nodo_Encabezado():
     def __init__(self, id):
         self.id : int = id #posicion de fila o columna
