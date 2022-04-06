@@ -18,7 +18,6 @@ class Lista_UM:
     def mostrarUnidad(self):
         tmp = self.inicio
         while tmp is not None:
-            #time.sleep(0.5)
             print("Posicion X: " + tmp.getPosX(), "Posicion Y: " + tmp.getPosY(), "Capacidad: " + tmp.getCapacidad() )
             tmp = tmp.siguiente
 
@@ -29,3 +28,12 @@ class Lista_UM:
                 return tmp 
             tmp = tmp.siguiente
         return False
+
+    def buscarUnidad1(self, posx, posy):
+        tmp = self.inicio
+        while tmp is not None:
+            if tmp.getPosX() == str(posx) and tmp.getPosY() == str(posy) :
+                tmp.getCapacidad()
+                capacidadrobot = tmp.getCapacidad()
+            tmp = tmp.siguiente
+        return capacidadrobot

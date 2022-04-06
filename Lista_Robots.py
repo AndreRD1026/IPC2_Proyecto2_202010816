@@ -3,7 +3,7 @@ class Lista_Robots:
     def __init__(self):
         self.inicio = None
         self.largoRobot = 0
-
+    #Agregado robots
     def agregarRobot(self, tipo,capcidad_combate,nombre_r):
         nuevoRobot = Robot(tipo,capcidad_combate,nombre_r)
         self.largoRobot +=1
@@ -22,7 +22,7 @@ class Lista_Robots:
             if tmp.getCapacidad_Combate() == 0:
                 print("Nombre: " , tmp.getNombre_R(), " Tipo: " , tmp.getTipo() )
             else:
-                 print("Nombre: " , tmp.getNombre_R(), " Tipo: " , tmp.getTipo(), " Capacidad: " , str(tmp.getCapacidad_Combate()))
+                print("Nombre: " , tmp.getNombre_R(), " Tipo: " , tmp.getTipo(), " Capacidad: " , str(tmp.getCapacidad_Combate()))
             tmp = tmp.siguiente
 
 
@@ -45,6 +45,18 @@ class Lista_Robots:
                 robotsf += 1    
             tmp = tmp.siguiente
         return robotsf
+
+
+    def obtenerCapacidad(self,nombre_r):
+        tmp = self.inicio
+        robotsf = 0
+        while tmp is not None:
+            if tmp.nombre_r == nombre_r:
+                #print("Capacidad: ", tmp.getCapacidad_Combate())
+                tmp.getCapacidad_Combate()
+                robotsf = tmp.getCapacidad_Combate() 
+            tmp = tmp.siguiente
+        return robotsf       
 
 
 
@@ -71,3 +83,20 @@ class Lista_Robots:
                 return tmp
             tmp = tmp.siguiente
         return False
+
+    def actualizarRobots(self, nombre_r):
+        tmp = self.inicio
+        while tmp is not None:
+            if tmp.nombre_r == nombre_r:
+                self.inicio = tmp.siguiente
+                tmp.siguiente = None
+                print('Robot ',nombre_r, ' se ha actualizado')
+                break
+            elif tmp.siguiente is not None:
+                if tmp.siguiente.nombre_r == nombre_r:
+                    Nodo_a_borrar = tmp.siguiente
+                    tmp.siguiente = Nodo_a_borrar.siguiente
+                    Nodo_a_borrar.siguiente = None
+                    print('Robot ', nombre_r,' se ha actualizado')
+                    break
+            tmp = tmp.siguiente

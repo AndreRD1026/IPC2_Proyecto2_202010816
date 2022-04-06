@@ -7,7 +7,6 @@ import time
 from MatrizDispersa import MatrizDispersa
 import webbrowser
 
-capacidad_combate = 99999
 ciudades = listaciudad()
 robots = Lista_Robots()
 
@@ -16,11 +15,12 @@ archivoEntrada = None
 rutaEntrada = None
 
 
-def cargarArchivo():
+def cargarArchivo1():
     global archivoEntrada
     global rutaEntrada
     global ciudades 
     global robots
+    global unidades
     
     print("---------- Cargar Archivo ----------")
     Filename = input('Ingrese la ruta del archivo: ')
@@ -44,6 +44,8 @@ def cargarArchivo():
                         for subelemento1 in subelemento:
                             if subelemento1.tag == 'nombre':
                                 nombre = subelemento1.text
+                                if ciudades.buscarCiudad(nombre) != False:
+                                    ciudades.actualizarCiudad(nombre)
                                 doc = open("Salida/" + subelemento1.text + ".txt", "w")
                                 #doc = open(subelemento1.text + ".txt", "w")
                             if subelemento1.tag == 'fila':
@@ -51,12 +53,14 @@ def cargarArchivo():
                             if subelemento1.tag == 'unidadMilitar':
                                 unidades.agregarUnidad(subelemento1.attrib['fila'], subelemento1.attrib['columna'], subelemento1.text)
                         #ciudades.agregar(nombre, unidades)
-                        ciudades.agregarMatriz(0, nombre, unidades)
-                        
                         doc.close()
+                        ciudades.agregarMatriz(0, nombre, unidades)    
                     if subelemento.tag == 'robot':
                         for subelemento1 in subelemento:
                             if subelemento1.tag == 'nombre':
+                                nombre_r = subelemento1.text
+                                if robots.buscarRobot(nombre_r) != False:
+                                    robots.actualizarRobots(nombre_r)
                                 if 'capacidad' in subelemento1.attrib:
                                     robots.agregarRobot(subelemento1.attrib['tipo'], int(subelemento1.attrib['capacidad']), subelemento1.text)
                                 else:
@@ -83,6 +87,8 @@ def cargarArchivo():
 def realizarmision():
     global ciudad
     global nombrerobot
+    global nombrerobot1
+    global capacidadpelea
     ciudad = buscarciudad()
     print("")
     print("----Misiones Disponibles----")
@@ -125,15 +131,21 @@ def realizarmision():
                 if robots.buscarRobotmision(nombrerobot1, 'ChapinFighter') != False:
                     print("")
                     print("---Recursos disponibles---")
+                    capacidadpelea = robots.obtenerCapacidad(nombrerobot1)
+                    #print(nombrerobot1 ,"+", robots.obtenerCapacidad(nombrerobot1))
                     ciudad.mostrarRecurso()
+                    recorrerciudadRecurso(ciudad)
                 else:
                     print("El robot no ha sido encontrado")
+                    
         else:
             print("Lo sentimos, la ciudad no cuenta con recursos para completar la misión")
 
 
 def recorrerciudad(ciudad):
     global Civilfinal
+    global coordenadax
+    global coordenaday
     print("")
     coordenadax = input("Ingrese la fila: ")
     coordenaday = input("Ingrese la columna: ")
@@ -162,34 +174,66 @@ def recorrerciudad(ciudad):
             tmp = tmp.siguiente
         #return False
 
+def recorrerciudadRecurso(ciudad):
+    global RecursoFinal
+    global coordenadax
+    global coordenaday
+    print("")
+    coordenadax = input("Ingrese la fila: ")
+    coordenaday = input("Ingrese la columna: ")
+    print("Seleccionó: ", coordenadax, coordenaday)
+    #ciudad.buscarUC(coordenadax, coordenaday)
     
+    if ciudad.buscarRecurso(coordenadax, coordenaday) is False:
+        print("No ingresó una coordenada correcta")
+    else:
+        
+        print("Examinando el camino hacia la coordenada")
+        ciudad.mostrarEntrada()
+        RecursoFinal = ciudad.buscarRecurso(coordenadax, coordenaday)
+        #misionCivil()
+        tmp = ciudad.filas.primero
+        while tmp is not None:
+            nodoEntrada = tmp.acceso
+            while nodoEntrada is not None:
+                if nodoEntrada.caracter == 'E':
+                    if misionRecurso(nodoEntrada) == True:
+                        break
+                    #print("Pos X: " + str(nodoEntrada.coordenadaX), " Pos Y: " + str(nodoEntrada.coordenadaY))
+                    #return nodoEntrada
+                nodoEntrada = nodoEntrada.derecha
+                
+            tmp = tmp.siguiente
+        #return False
+
+
 
 
 def misionCivil(entrada):
     ciudad.limpiar()
-    print("entra a mision")  
+    print("Entra en el recorrido la entrada")  
     #ciudad.buscarEntrada()
     #entrada = ciudad.buscarEntrada()
     llega = False
     while llega is False:
         if entrada != None and entrada.arriba == Civilfinal:
             llega = True
-            ciudad.graficarNeatoR1(ciudad.nombre, ciudad, nombrerobot)
+            ciudad.graficarNeatoR1(ciudad.nombre, ciudad, nombrerobot, coordenadax, coordenaday)
             return True
             break     
         elif entrada != None and entrada.izquierda == Civilfinal:
             llega = True
-            ciudad.graficarNeatoR1(ciudad.nombre, ciudad, nombrerobot)
+            ciudad.graficarNeatoR1(ciudad.nombre, ciudad, nombrerobot, coordenadax, coordenaday)
             return True
             break
         elif entrada != None and entrada.derecha == Civilfinal:
             llega = True
-            ciudad.graficarNeatoR1(ciudad.nombre, ciudad, nombrerobot)
+            ciudad.graficarNeatoR1(ciudad.nombre, ciudad, nombrerobot, coordenadax, coordenaday)
             return True
             break
         elif entrada != None and entrada.abajo == Civilfinal:
             llega = True
-            ciudad.graficarNeatoR1(ciudad.nombre, ciudad, nombrerobot)
+            ciudad.graficarNeatoR1(ciudad.nombre, ciudad, nombrerobot, coordenadax, coordenaday)
             return True
             break
 
@@ -205,6 +249,15 @@ def misionCivil(entrada):
             elif entrada.abajo != None and entrada.abajo.caracter == 'C':
                 entrada.abajo.caracter = 'C'
                 entrada = entrada.abajo
+            elif entrada.arriba != None and entrada.arriba.caracter == 'C':
+                entrada.arriba.caracter = 'C'
+                entrada = entrada.arriba
+            elif entrada.izquierda != None and entrada.izquierda.caracter == 'C':
+                entrada.izquierda.caracter = 'C'
+                entrada = entrada.izquierda
+            elif entrada.derecha != None and entrada.derecha.caracter == 'C':
+                entrada.derecha.caracter = 'C'
+                entrada = entrada.derecha
             elif entrada.arriba != None and entrada.arriba.caracter == ' ':
                 entrada.arriba.caracter = '='
                 entrada = entrada.arriba            
@@ -228,8 +281,39 @@ def misionCivil(entrada):
                 entrada.caracter = '$'
                 #entrada.arriba.caracter = '$'
                 entrada = entrada.arriba
-            #elif entrada.derecha != None and entrada.derecha.caracter == 'UM':
-            #    entrada.izquierda.
+            #Regresos no camino
+            elif entrada.derecha != None  and entrada.derecha.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.izquierda != None  and entrada.izquierda.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.arriba != None  and entrada.arriba.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
+                entrada = entrada.abajo
+            elif entrada.abajo != None  and entrada.abajo.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
+                entrada = entrada.arriba
+            elif entrada.derecha != None  and entrada.derecha.caracter == 'R':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.izquierda != None  and entrada.izquierda.caracter == 'R':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.arriba != None  and entrada.arriba.caracter == 'R':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
+                entrada = entrada.abajo
+            elif entrada.abajo != None  and entrada.abajo.caracter == 'R':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
+                entrada = entrada.arriba
 
 
         #Abajo - Derecha
@@ -246,6 +330,15 @@ def misionCivil(entrada):
             elif entrada.abajo != None and entrada.abajo.caracter == 'C':
                 entrada.abajo.caracter = 'C'
                 entrada = entrada.abajo
+            elif entrada.arriba != None and entrada.arriba.caracter == 'C':
+                entrada.arriba.caracter = 'C'
+                entrada = entrada.arriba
+            elif entrada.izquierda != None and entrada.izquierda.caracter == 'C':
+                entrada.izquierda.caracter = 'C'
+                entrada = entrada.izquierda
+            elif entrada.derecha != None and entrada.derecha.caracter == 'C':
+                entrada.derecha.caracter = 'C'
+                entrada = entrada.derecha
             elif entrada.derecha != None and entrada.derecha.caracter == ' ':
                 entrada.derecha.caracter = '='
                 entrada = entrada.derecha
@@ -263,6 +356,39 @@ def misionCivil(entrada):
                 #entrada.abajo.caracter = '$'
                 entrada = entrada.abajo
             elif entrada.abajo != None  and entrada.abajo.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
+                entrada = entrada.arriba
+            #Regresos no camino
+            elif entrada.derecha != None  and entrada.derecha.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.izquierda != None  and entrada.izquierda.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.arriba != None  and entrada.arriba.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
+                entrada = entrada.abajo
+            elif entrada.abajo != None  and entrada.abajo.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
+                entrada = entrada.arriba
+            elif entrada.derecha != None  and entrada.derecha.caracter == 'R':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.izquierda != None  and entrada.izquierda.caracter == 'R':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.arriba != None  and entrada.arriba.caracter == 'R':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
+                entrada = entrada.abajo
+            elif entrada.abajo != None  and entrada.abajo.caracter == 'R':
                 entrada.caracter = '$'
                 #entrada.arriba.caracter = '$'
                 entrada = entrada.arriba
@@ -281,6 +407,15 @@ def misionCivil(entrada):
             elif entrada.abajo != None and entrada.abajo.caracter == 'C':
                 entrada.abajo.caracter = 'C'
                 entrada = entrada.abajo
+            elif entrada.arriba != None and entrada.arriba.caracter == 'C':
+                entrada.arriba.caracter = 'C'
+                entrada = entrada.arriba
+            elif entrada.izquierda != None and entrada.izquierda.caracter == 'C':
+                entrada.izquierda.caracter = 'C'
+                entrada = entrada.izquierda
+            elif entrada.derecha != None and entrada.derecha.caracter == 'C':
+                entrada.derecha.caracter = 'C'
+                entrada = entrada.derecha
             elif entrada.derecha != None and entrada.derecha.caracter == ' ':
                 entrada.derecha.caracter = '='
                 entrada = entrada.derecha
@@ -301,6 +436,39 @@ def misionCivil(entrada):
                 entrada.caracter = '$'
                 #entrada.arriba.caracter = '$'
                 entrada = entrada.abajo
+            #Regresos no camino
+            elif entrada.derecha != None  and entrada.derecha.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.izquierda != None  and entrada.izquierda.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.arriba != None  and entrada.arriba.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
+                entrada = entrada.abajo
+            elif entrada.abajo != None  and entrada.abajo.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
+                entrada = entrada.arriba
+            elif entrada.derecha != None  and entrada.derecha.caracter == 'R':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.izquierda != None  and entrada.izquierda.caracter == 'R':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.arriba != None  and entrada.arriba.caracter == 'R':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
+                entrada = entrada.abajo
+            elif entrada.abajo != None  and entrada.abajo.caracter == 'R':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
+                entrada = entrada.arriba
 
 
         #Abajo - izquierda
@@ -320,6 +488,15 @@ def misionCivil(entrada):
             elif entrada.abajo != None and entrada.abajo.caracter == 'C':
                 entrada.abajo.caracter = 'C'
                 entrada = entrada.abajo
+            elif entrada.arriba != None and entrada.arriba.caracter == 'C':
+                entrada.arriba.caracter = 'C'
+                entrada = entrada.arriba
+            elif entrada.izquierda != None and entrada.izquierda.caracter == 'C':
+                entrada.izquierda.caracter = 'C'
+                entrada = entrada.izquierda
+            elif entrada.derecha != None and entrada.derecha.caracter == 'C':
+                entrada.derecha.caracter = 'C'
+                entrada = entrada.derecha
             #Regresos
             elif entrada.arriba != None  and entrada.arriba.caracter != ' ':
                 entrada.caracter = '$'
@@ -337,25 +514,444 @@ def misionCivil(entrada):
                 entrada.caracter = '$'
                 #entrada.arriba.caracter = '$'
                 entrada = entrada.arriba
-
-        
-        
+            #Regresos no camino
+            elif entrada.derecha != None  and entrada.derecha.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.izquierda != None  and entrada.izquierda.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.arriba != None  and entrada.arriba.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
+                entrada = entrada.abajo
+            elif entrada.abajo != None  and entrada.abajo.caracter == '*':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
+                entrada = entrada.arriba
 
         else:
-            print("Error, la misión no pudo ser completada")
+            print(" ¡¡ MISION IMPOSIBLE !!")
+            print("La misión no pudo ser completada")
             return False
             break
 
 
     
     
-    #webbrowser.open("matriz_"+ ciudad.nombre + "_mision")
+        
 
 
+def misionRecurso(entrada):
+    global capacidadfinal
+    ciudad.limpiarRecurso()
+    capacidadfinal = capacidadpelea
+    print("Entra en el recorrido la entrada")  
+    #ciudad.buscarEntrada()
+    #entrada = ciudad.buscarEntrada()
+    llega = False
+    while llega is False:
+        if entrada != None and entrada.arriba == RecursoFinal:
+            llega = True
+            ciudad.graficarNeatoR2(ciudad.nombre, ciudad, nombrerobot1, coordenadax, coordenaday, capacidadpelea, capacidadfinal)
+            return True
+            break     
+        elif entrada != None and entrada.izquierda == RecursoFinal:
+            llega = True
+            ciudad.graficarNeatoR2(ciudad.nombre, ciudad, nombrerobot1, coordenadax, coordenaday, capacidadpelea, capacidadfinal)
+            return True
+            break
+        elif entrada != None and entrada.derecha == RecursoFinal:
+            llega = True
+            ciudad.graficarNeatoR2(ciudad.nombre, ciudad, nombrerobot1, coordenadax, coordenaday, capacidadpelea, capacidadfinal)
+            return True
+            break
+        elif entrada != None and entrada.abajo == RecursoFinal:
+            llega = True
+            ciudad.graficarNeatoR2(ciudad.nombre, ciudad, nombrerobot1, coordenadax, coordenaday, capacidadpelea, capacidadfinal)
+            return True
+            break
+
+
+        #Arriba - izquierda
+        elif entrada != None and entrada.coordenadaY <= RecursoFinal.coordenadaY and entrada.coordenadaX <= RecursoFinal.coordenadaX:
+            if entrada.derecha != None and entrada.derecha.caracter == ' ':
+                entrada.derecha.caracter = '='
+                entrada = entrada.derecha
+            elif entrada.abajo != None and entrada.abajo.caracter == ' ':
+                entrada.abajo.caracter = '='
+                entrada = entrada.abajo
+            elif entrada.abajo != None and entrada.abajo.caracter == 'C':
+                entrada.abajo.caracter = 'C'
+                entrada = entrada.abajo
+            elif entrada.arriba != None and entrada.arriba.caracter == 'C':
+                entrada.arriba.caracter = 'C'
+                entrada = entrada.arriba
+            elif entrada.izquierda != None and entrada.izquierda.caracter == 'C':
+                entrada.izquierda.caracter = 'C'
+                entrada = entrada.izquierda
+            elif entrada.derecha != None and entrada.derecha.caracter == 'C':
+                entrada.derecha.caracter = 'C'
+                entrada = entrada.derecha
+            elif entrada.arriba != None and entrada.arriba.caracter == ' ':
+                entrada.arriba.caracter = '='
+                entrada = entrada.arriba            
+            elif entrada.izquierda != None and entrada.izquierda.caracter == ' ':
+                entrada.izquierda.caracter = '='
+                entrada = entrada.izquierda
+            # elif (entrada.derecha != None and entrada.derecha.caracter == 'UM'
+            # and unidades.buscarUnidad1(entrada.derecha.posx, entrada.derecha.posy) != False
+            # and int(unidades.buscarUnidad1(entrada.derecha.posx, entrada.derecha.posy)).getCapacidad() <= int(capacidadpelea)):
+            #     capacidadfinal = int(capacidadpelea) - int((unidades.buscarUnidad1(entrada.derecha.posx, entrada.derecha.posy)).getCapacidad())
+            #     entrada.derecha.carcter = '='
+            #     entrada = entrada.derecha
+            # # elif entrada.derecha != None and entrada.derecha.caracter == 'UM' and unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) != False and int(unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY).getCapacidad() <= int(capacidadpelea)) :
+            #     capacidadfinal = capacidadpelea - unidades.buscarUnidad1(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) 
+            #     entrada.derecha.caracter = '='
+            #     entrada = entrada.derecha
+            # elif entrada.arriba != None and entrada.arriba.caracter == 'UM' and unidades.buscarUnidad(entrada.arriba.coordenadaX, entrada.arriba.coordenadaY) != False and int(unidades.buscarUnidad(entrada.arriba.coordenadaX, entrada.arriba.coordenadaY).getCapacidad() <= int(capacidadpelea)) :
+            #     capacidadfinal = capacidadpelea - unidades.buscarUnidad1(entrada.arriba.coordenadaX, entrada.arriba.coordenadaY) 
+            #     entrada.arriba.caracter = '='
+            #     entrada = entrada.arriba
+            # elif entrada.abajo != None and entrada.abajo.caracter == 'UM' and unidades.buscarUnidad(entrada.abajo.coordenadaX, entrada.abajo.coordenadaY) != False and int(unidades.buscarUnidad(entrada.abajo.coordenadaX, entrada.abajo.coordenadaY).getCapacidad() <= int(capacidadpelea)) :
+            #     capacidadfinal = capacidadpelea - unidades.buscarUnidad1(entrada.abajo.coordenadaX, entrada.abajo.coordenadaY) 
+            #     entrada.abajo.caracter = '='
+            #     entrada = entrada.abajo
+            # elif entrada.izquierda != None and entrada.izquierda.caracter == 'UM' and unidades.buscarUnidad(entrada.izquierda.coordenadaX, entrada.izquierda.coordenadaY) != False and int(unidades.buscarUnidad(entrada.izquierda.coordenadaX, entrada.izquierda.coordenadaY).getCapacidad() <= int(capacidadpelea)) :
+            #     capacidadfinal = capacidadpelea - unidades.buscarUnidad1(entrada.izquierda.coordenadaX, entrada.izquierda.coordenadaY) 
+            #     entrada.izquierda.caracter = '='
+            #     entrada = entrada.izquierda
+            # #Regresos
+            elif entrada.derecha != None  and entrada.derecha.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.izquierda != None  and entrada.izquierda.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.arriba != None  and entrada.arriba.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
+                entrada = entrada.abajo
+            elif entrada.abajo != None  and entrada.abajo.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
+                entrada = entrada.arriba
+            #Regreso de no camino
+            # elif entrada.derecha != None  and entrada.derecha.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.izquierda.caracter = '$'
+            #     entrada = entrada.izquierda
+            # elif entrada.izquierda != None  and entrada.izquierda.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.derecha.caracter = '$'
+            #     entrada = entrada.derecha
+            # elif entrada.arriba != None  and entrada.arriba.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.abajo.caracter = '$'
+            #     entrada = entrada.abajo
+            # elif entrada.abajo != None  and entrada.abajo.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.arriba.caracter = '$'
+            #     entrada = entrada.arriba
+            # # elif entrada.derecha != None and entrada.derecha.caracter == 'UM' and unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.izquierda.caracter = '='
+            #     entrada = entrada.izquierda
+            # elif entrada.izquierda != None and entrada.izquierda.caracter == 'UM' and unidades.buscarUnidad(entrada.izquierda.coordenadaX, entrada.izquierda.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.derecha.caracter = '='
+            #     entrada = entrada.derecha
+            # elif entrada.arriba != None and entrada.arriba.caracter == 'UM' and unidades.buscarUnidad(entrada.arriba.coordenadaX, entrada.arriba.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.abajo.caracter = '='
+            #     entrada = entrada.abajo
+            # elif entrada.abajo != None and entrada.abajo.caracter == 'UM' and unidades.buscarUnidad(entrada.abajo.coordenadaX, entrada.abajo.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.arriba.caracter = '='
+            #     entrada = entrada.arriba
+            
+
+
+        #Abajo - Derecha
+        elif entrada != None and entrada.coordenadaY >= RecursoFinal.coordenadaY and entrada.coordenadaX >= RecursoFinal.coordenadaX:
+            if entrada.izquierda != None and entrada.izquierda.caracter == ' ':
+                entrada.izquierda.caracter = '='
+                entrada = entrada.izquierda
+            elif entrada.arriba != None and entrada.arriba.caracter == ' ':
+                entrada.arriba.caracter = '='
+                entrada = entrada.arriba
+            elif entrada.abajo != None and entrada.abajo.caracter == ' ':
+                entrada.abajo.caracter = '='
+                entrada = entrada.abajo
+            elif entrada.abajo != None and entrada.abajo.caracter == 'C':
+                entrada.abajo.caracter = 'C'
+                entrada = entrada.abajo
+            elif entrada.arriba != None and entrada.arriba.caracter == 'C':
+                entrada.arriba.caracter = 'C'
+                entrada = entrada.arriba
+            elif entrada.izquierda != None and entrada.izquierda.caracter == 'C':
+                entrada.izquierda.caracter = 'C'
+                entrada = entrada.izquierda
+            elif entrada.derecha != None and entrada.derecha.caracter == 'C':
+                entrada.derecha.caracter = 'C'
+                entrada = entrada.derecha
+            elif entrada.derecha != None and entrada.derecha.caracter == ' ':
+                entrada.derecha.caracter = '='
+                entrada = entrada.derecha
+            # elif entrada.derecha != None and entrada.derecha.caracter == 'UM' and unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) != False and int(unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY).getCapacidad() <= int(capacidadpelea)) :
+            #     capacidadfinal = capacidadpelea - unidades.buscarUnidad1(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) 
+            #     entrada.derecha.caracter = '='
+            #     entrada = entrada.derecha
+            # elif entrada.arriba != None and entrada.arriba.caracter == 'UM' and unidades.buscarUnidad(entrada.arriba.coordenadaX, entrada.arriba.coordenadaY) != False and int(unidades.buscarUnidad(entrada.arriba.coordenadaX, entrada.arriba.coordenadaY).getCapacidad() <= int(capacidadpelea)) :
+            #     capacidadfinal = capacidadpelea - unidades.buscarUnidad1(entrada.arriba.coordenadaX, entrada.arriba.coordenadaY) 
+            #     entrada.arriba.caracter = '='
+            #     entrada = entrada.arriba
+            # elif entrada.abajo != None and entrada.abajo.caracter == 'UM' and unidades.buscarUnidad(entrada.abajo.coordenadaX, entrada.abajo.coordenadaY) != False and int(unidades.buscarUnidad(entrada.abajo.coordenadaX, entrada.abajo.coordenadaY).getCapacidad() <= int(capacidadpelea)) :
+            #     capacidadfinal = capacidadpelea - unidades.buscarUnidad1(entrada.abajo.coordenadaX, entrada.abajo.coordenadaY) 
+            #     entrada.abajo.caracter = '='
+            #     entrada = entrada.abajo
+            # elif entrada.izquierda != None and entrada.izquierda.caracter == 'UM' and unidades.buscarUnidad(entrada.izquierda.coordenadaX, entrada.izquierda.coordenadaY) != False and int(unidades.buscarUnidad(entrada.izquierda.coordenadaX, entrada.izquierda.coordenadaY).getCapacidad() <= int(capacidadpelea)) :
+            #     capacidadfinal = capacidadpelea - unidades.buscarUnidad1(entrada.izquierda.coordenadaX, entrada.izquierda.coordenadaY) 
+            #     entrada.izquierda.caracter = '='
+            #     entrada = entrada.izquierda
+            # # #Regresos
+            elif entrada.izquierda != None  and entrada.izquierda.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.derecha != None  and entrada.derecha.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.arriba != None  and entrada.arriba.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
+                entrada = entrada.abajo
+            elif entrada.abajo != None  and entrada.abajo.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
+                entrada = entrada.arriba
+            #Regresos no camino
+            # elif entrada.derecha != None  and entrada.derecha.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.izquierda.caracter = '$'
+            #     entrada = entrada.izquierda
+            # elif entrada.izquierda != None  and entrada.izquierda.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.derecha.caracter = '$'
+            #     entrada = entrada.derecha
+            # elif entrada.arriba != None  and entrada.arriba.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.abajo.caracter = '$'
+            #     entrada = entrada.abajo
+            # elif entrada.abajo != None  and entrada.abajo.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.arriba.caracter = '$'
+            #     entrada = entrada.arriba
+            # # elif entrada.derecha != None and entrada.derecha.caracter == 'UM' and unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.izquierda.caracter = '='
+            #     entrada = entrada.izquierda
+            # elif entrada.izquierda != None and entrada.izquierda.caracter == 'UM' and unidades.buscarUnidad(entrada.izquierda.coordenadaX, entrada.izquierda.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.derecha.caracter = '='
+            #     entrada = entrada.derecha
+            # elif entrada.arriba != None and entrada.arriba.caracter == 'UM' and unidades.buscarUnidad(entrada.arriba.coordenadaX, entrada.arriba.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.abajo.caracter = '='
+            #     entrada = entrada.abajo
+            # elif entrada.abajo != None and entrada.abajo.caracter == 'UM' and unidades.buscarUnidad(entrada.abajo.coordenadaX, entrada.abajo.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.arriba.caracter = '='
+            #     entrada = entrada.arriba
+            
+
+        #Arriba - derecha
+        elif entrada != None and entrada.coordenadaX <= RecursoFinal.coordenadaX and entrada.coordenadaY >= RecursoFinal.coordenadaY :
+            if entrada.abajo != None and entrada.abajo.caracter == ' ':
+                entrada.abajo.caracter = '='
+                entrada = entrada.abajo
+            elif entrada.izquierda != None and entrada.izquierda.caracter == ' ':
+                entrada.izquierda.caracter = '='
+                entrada = entrada.izquierda
+            elif entrada.arriba != None and entrada.arriba.caracter == ' ':
+                entrada.arriba.caracter = '='
+                entrada = entrada.arriba
+            elif entrada.abajo != None and entrada.abajo.caracter == 'C':
+                entrada.abajo.caracter = 'C'
+                entrada = entrada.abajo
+            elif entrada.arriba != None and entrada.arriba.caracter == 'C':
+                entrada.arriba.caracter = 'C'
+                entrada = entrada.arriba
+            elif entrada.izquierda != None and entrada.izquierda.caracter == 'C':
+                entrada.izquierda.caracter = 'C'
+                entrada = entrada.izquierda
+            elif entrada.derecha != None and entrada.derecha.caracter == 'C':
+                entrada.derecha.caracter = 'C'
+                entrada = entrada.derecha
+            elif entrada.derecha != None and entrada.derecha.caracter == ' ':
+                entrada.derecha.caracter = '='
+                entrada = entrada.derecha
+            # elif entrada.derecha != None and entrada.derecha.caracter == 'UM' and unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) != False and int(unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY).getCapacidad() <= int(capacidadpelea)) :
+            #     capacidadfinal = capacidadpelea - unidades.buscarUnidad1(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) 
+            #     entrada.derecha.caracter = '='
+            #     entrada = entrada.derecha
+            # elif entrada.arriba != None and entrada.arriba.caracter == 'UM' and unidades.buscarUnidad(entrada.arriba.coordenadaX, entrada.arriba.coordenadaY) != False and int(unidades.buscarUnidad(entrada.arriba.coordenadaX, entrada.arriba.coordenadaY).getCapacidad() <= int(capacidadpelea)) :
+            #     capacidadfinal = capacidadpelea - unidades.buscarUnidad1(entrada.arriba.coordenadaX, entrada.arriba.coordenadaY) 
+            #     entrada.arriba.caracter = '='
+            #     entrada = entrada.arriba
+            # elif entrada.abajo != None and entrada.abajo.caracter == 'UM' and unidades.buscarUnidad(entrada.abajo.coordenadaX, entrada.abajo.coordenadaY) != False and int(unidades.buscarUnidad(entrada.abajo.coordenadaX, entrada.abajo.coordenadaY).getCapacidad() <= int(capacidadpelea)) :
+            #     capacidadfinal = capacidadpelea - unidades.buscarUnidad1(entrada.abajo.coordenadaX, entrada.abajo.coordenadaY) 
+            #     entrada.abajo.caracter = '='
+            #     entrada = entrada.abajo
+            # elif entrada.izquierda != None and entrada.izquierda.caracter == 'UM' and unidades.buscarUnidad(entrada.izquierda.coordenadaX, entrada.izquierda.coordenadaY) != False and int(unidades.buscarUnidad(entrada.izquierda.coordenadaX, entrada.izquierda.coordenadaY).getCapacidad() <= int(capacidadpelea)) :
+            #     capacidadfinal = capacidadpelea - unidades.buscarUnidad1(entrada.izquierda.coordenadaX, entrada.izquierda.coordenadaY) 
+            #     entrada.izquierda.caracter = '='
+            #     entrada = entrada.izquierda
+            # # #Regresos
+            elif entrada.abajo != None  and entrada.abajo.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
+                entrada = entrada.arriba
+            elif entrada.derecha != None  and entrada.derecha.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.izquierda != None  and entrada.izquierda.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.arriba != None  and entrada.arriba.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
+                entrada = entrada.abajo
+            #Regresos no camino
+            # elif entrada.derecha != None  and entrada.derecha.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.izquierda.caracter = '$'
+            #     entrada = entrada.izquierda
+            # elif entrada.izquierda != None  and entrada.izquierda.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.derecha.caracter = '$'
+            #     entrada = entrada.derecha
+            # elif entrada.arriba != None  and entrada.arriba.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.abajo.caracter = '$'
+            #     entrada = entrada.abajo
+            # elif entrada.abajo != None  and entrada.abajo.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.arriba.caracter = '$'
+            #     entrada = entrada.arriba
+            # # elif entrada.derecha != None and entrada.derecha.caracter == 'UM' and unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.izquierda.caracter = '='
+            #     entrada = entrada.izquierda
+            # elif entrada.izquierda != None and entrada.izquierda.caracter == 'UM' and unidades.buscarUnidad(entrada.izquierda.coordenadaX, entrada.izquierda.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.derecha.caracter = '='
+            #     entrada = entrada.derecha
+            # elif entrada.arriba != None and entrada.arriba.caracter == 'UM' and unidades.buscarUnidad(entrada.arriba.coordenadaX, entrada.arriba.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.abajo.caracter = '='
+            #     entrada = entrada.abajo
+            # elif entrada.abajo != None and entrada.abajo.caracter == 'UM' and unidades.buscarUnidad(entrada.abajo.coordenadaX, entrada.abajo.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.arriba.caracter = '='
+            #     entrada = entrada.arriba
+
+
+        #Abajo - izquierda
+        elif entrada != None and entrada.coordenadaX >= RecursoFinal.coordenadaX and entrada.coordenadaY <= RecursoFinal.coordenadaY :
+            if entrada.arriba != None and entrada.arriba.caracter == ' ':
+                entrada.arriba.caracter = '='
+                entrada = entrada.arriba
+            elif entrada.derecha != None and entrada.derecha.caracter == ' ':
+                entrada.derecha.caracter = '='
+                entrada = entrada.derecha
+            elif entrada.izquierda != None and entrada.izquierda.caracter == ' ':
+                entrada.izquierda.caracter = '='
+                entrada = entrada.izquierda
+            elif entrada.abajo != None and entrada.abajo.caracter == ' ':
+                entrada.abajo.caracter = '='
+                entrada = entrada.abajo
+            elif entrada.abajo != None and entrada.abajo.caracter == 'C':
+                entrada.abajo.caracter = 'C'
+                entrada = entrada.abajo
+            elif entrada.arriba != None and entrada.arriba.caracter == 'C':
+                entrada.arriba.caracter = 'C'
+                entrada = entrada.arriba
+            elif entrada.izquierda != None and entrada.izquierda.caracter == 'C':
+                entrada.izquierda.caracter = 'C'
+                entrada = entrada.izquierda
+            elif entrada.derecha != None and entrada.derecha.caracter == 'C':
+                entrada.derecha.caracter = 'C'
+                entrada = entrada.derecha
+            
+            
+            # #Regresos
+            elif entrada.arriba != None  and entrada.arriba.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.izquierda.caracter = '$'
+                entrada = entrada.abajo
+            elif entrada.derecha != None  and entrada.derecha.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.derecha.caracter = '$'
+                entrada = entrada.izquierda
+            elif entrada.izquierda != None  and entrada.izquierda.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.abajo.caracter = '$'
+                entrada = entrada.derecha
+            elif entrada.abajo != None  and entrada.abajo.caracter != ' ':
+                entrada.caracter = '$'
+                #entrada.arriba.caracter = '$'
+                entrada = entrada.arriba
+            #Regresos no camino
+            # elif entrada.derecha != None  and entrada.derecha.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.izquierda.caracter = '$'
+            #     entrada = entrada.izquierda
+            # elif entrada.izquierda != None  and entrada.izquierda.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.derecha.caracter = '$'
+            #     entrada = entrada.derecha
+            # elif entrada.arriba != None  and entrada.arriba.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.abajo.caracter = '$'
+            #     entrada = entrada.abajo
+            # elif entrada.abajo != None  and entrada.abajo.caracter == '*':
+            #     entrada.caracter = '$'
+            #     #entrada.arriba.caracter = '$'
+            #     entrada = entrada.arriba
+            # # elif entrada.derecha != None and entrada.derecha.caracter == 'UM' and unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.izquierda.caracter = '='
+            #     entrada = entrada.izquierda
+            # elif entrada.izquierda != None and entrada.izquierda.caracter == 'UM' and unidades.buscarUnidad(entrada.izquierda.coordenadaX, entrada.izquierda.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.derecha.caracter = '='
+            #     entrada = entrada.derecha
+            # elif entrada.arriba != None and entrada.arriba.caracter == 'UM' and unidades.buscarUnidad(entrada.arriba.coordenadaX, entrada.arriba.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.abajo.caracter = '='
+            #     entrada = entrada.abajo
+            # elif entrada.abajo != None and entrada.abajo.caracter == 'UM' and unidades.buscarUnidad(entrada.abajo.coordenadaX, entrada.abajo.coordenadaY) >= capacidadpelea:
+            #     #capacidadfinal = unidades.buscarUnidad(entrada.derecha.coordenadaX, entrada.derecha.coordenadaY) - capacidadpelea
+            #     entrada.arriba.caracter = '='
+            #     entrada = entrada.arriba
+
+        else:
+            print(" ¡¡ MISION IMPOSIBLE !!")
+            print("La misión no pudo ser completada")
+            return False
+            break
 
 
 def insertaTodo():
-    try:
+    #try:
         global nuevonombre
         
         print("")
@@ -365,8 +961,9 @@ def insertaTodo():
         if ciudades.largo  == 0:
             print("No hay Ciudades ingresados")
         else:
-            for i in range (1, ciudades.largo+1):
-                print("- ", ciudades.getCiudad(i).nombre)
+            #for i in range (1, ciudades.largo+1):
+            #    print("- ", ciudades.getCiudad(i).nombre)
+            ciudades.mostrarElementos()
             print("")
             print("Escriba el nombre de la Ciudad a graficar:")
             nombreCiudad = input("- ")
@@ -399,9 +996,9 @@ def insertaTodo():
                 #nuevonombre = "matriz_"+nombreCiudad
                 print("Ciudad Grafica con exito")
                 webbrowser.open("matriz_"+ nombreCiudad + ".pdf")
-    except:
-        print("")
-        print("Vuelva a elegir una opcion")
+    #except:
+    #    print("")
+    #    print("Vuelva a elegir una opcion")
 
 def buscarciudad():
     global matriz
@@ -414,8 +1011,9 @@ def buscarciudad():
         if ciudades.largo  == 0:
             print("No hay Ciudades ingresados")
         else:
-            for i in range (1, ciudades.largo+1):
-                print("- ", ciudades.getCiudad(i).nombre)
+            #for i in range (1, ciudades.largo+1):
+            #    print("- ", ciudades.getCiudad(i).nombre)
+            ciudades.mostrarElementos()
             print("")
             print("Escriba el nombre de la Ciudad para realizar una misión:")
             nombreCiudad = input("- ")
@@ -426,7 +1024,6 @@ def buscarciudad():
                 print("La ciudad ingresada no existe")
                 print("")
             else:
-                #print("Nombre elegido: ", nombreCiudad)
                 print("")
                 time.sleep(0.5)
                 with open("Salida/" + nombreCiudad + ".txt") as archivo:
@@ -450,27 +1047,23 @@ def buscarciudad():
 
 def menu():
     opcion = ''
-    while opcion != '5':
+    while opcion != '4':
         print("------Menu principal------")
         print("1. Cargar Ciudades")
         print("2. Realizar Misiones")
-        print("3. Escribir archivo de salida")
-        print("4. Graficar Ciudad")
-        print("5. Salida")
+        print("3. Graficar Ciudad")
+        print("4. Salida")
         opcion = input("Ingrese una opción: ")
 
         if opcion == '1':
-            cargarArchivo()
+            cargarArchivo1()
         elif opcion == '2':
             realizarmision()
             print("")
         elif opcion == '3':
-            print("Archivo de salida" +"\n" )
-        elif opcion == '4':
             insertaTodo()
-            #webbrowser.open("Grafico/" + nuevonombre + ".pdf")
             print("")
-        elif opcion != "5":
+        elif opcion != "4":
             print("Ingrese una opcion correcta" +"\n" )
         else:
             print("Gracias por usar nuestro programa :D")
